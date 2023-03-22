@@ -1,199 +1,323 @@
-var createError = require('http-errors');
 var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
 var app = express();
+var fs = require("fs");
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
 
-app.use(logger('dev'));
+// Use the built-in express.json() middleware to parse incoming JSON requests
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+var users = "models/users.json"
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.get('/listUsers', function (req, res) {
+   fs.readFile("models/users.json", 'utf8', function (err, data) {
+      console.log( data );
+      res.end( data );
+   });
+})
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
 
-module.exports = app;
-
-//////////////////////
-//OD TU DALJE REST API:
-
-const port = 3000;
-
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-
-//UPORABNIK
-// Sample data for our USER
-let users = [
-  { id: 1, name: 'John', surname: 'Doe', age: 30, gender: 'male', height: 180, weight: 75, email: 'john.doe@example.com' },
-  { id: 2, name: 'Jane', surname: 'Smith', age: 25, gender: 'female', height: 165, weight: 60, email: 'jane.smith@example.com' }
-];
-
-// GET method to retrieve all users
-app.get('/users', (req, res) => {
-  res.json(users);
-});
-
-// GET method to retrieve a single user by ID
 app.get('/users/:id', (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  if (!user) {
-    return res.status(404).send('User not found');
-  }
-  res.json(user);
+   const userId = req.params.id; // Get the user ID from the request parameter
+   fs.readFile('models/users.json', 'utf8', (err, data) => {
+     if (err) {
+       // If there is an error reading the file, return an error message
+       res.status(500).json({error: "Error reading user data"});
+       return;
+     }
+     const users = JSON.parse(data).users;
+     const user = users.find(user => user.id == userId); // Find the user with the matching ID
+ 
+     // Check if the user exists
+     if (user) {
+       // If the user exists, return their data
+       res.json(user);
+     } else {
+       // If the user does not exist, return an error message
+       res.status(404).json({error: "User not found"});
+     }
+   });
+ });
+
+ app.post('/users', (req, res) => {
+  const newUser = req.body; // Get the new user data from the request body
+
+  // Read the current users data from the file
+  fs.readFile('models/users.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading user data"});
+      return;
+    }
+
+    // Parse the current users data from the file
+    const users = JSON.parse(data).users;
+
+    // Generate a new ID for the user
+    const newUserId = users.length + 1;
+
+    // Create a new user object with the new ID
+    const newUserWithId = {
+      id: newUserId,
+      name: newUser.name,
+      surname: newUser.surname,
+      gender: newUser.gender,
+      height: newUser.height,
+      weight: newUser.weight,
+      email: newUser.email,
+      password: newUser.password
+    };
+
+    // Add the new user to the users array
+    users.push(newUserWithId);
+
+    // Write the updated users data back to the file
+    fs.writeFile('models/users.json', JSON.stringify({ users }), 'utf8', (err) => {
+      if (err) {
+        // If there is an error writing the file, return an error message
+        res.status(500).json({error: "Error writing user data"});
+        return;
+      }
+
+      // If the write is successful, return the new user data
+      res.json(newUserWithId);
+    });
+  });
 });
 
-// POST method to create a new user
-app.post('/users', (req, res) => {
-  const user = {
-    id: users.length + 1,
-    name: req.body.name,
-    surname: req.body.surname,
-    age: req.body.age,
-    gender: req.body.gender,
-    height: req.body.height,
-    weight: req.body.weight,
-    email: req.body.email
-  };
-  users.push(user);
-  res.json(user);
-});
+app.get('/listRecipes', function (req, res) {
+  fs.readFile("models/recipes.json", 'utf8', function (err, data) {
+     console.log( data );
+     res.end( data );
+  });
+})
 
-// PUT method to update a user by ID
-app.put('/users/:id', (req, res) => {
-  let user = users.find(u => u.id === parseInt(req.params.id));
-  if (!user) {
-    return res.status(404).send('User not found');
-  }
-  user.name = req.body.name;
-  user.surname = req.body.surname;
-  user.age = req.body.age;
-  user.gender = req.body.gender;
-  user.height = req.body.height;
-  user.weight = req.body.weight;
-  user.email = req.body.email;
-  res.json(user);
-});
-
-// DELETE method to delete a user by ID
-app.delete('/users/:id', (req, res) => {
-  const index = users.findIndex(u => u.id === parseInt(req.params.id));
-  if (index === -1) {
-    return res.status(404).send('User not found');
-  }
-  users.splice(index, 1);
-  res.sendStatus(204);
-});
-
-
-// RECIPE OF A MEAL
-let recipes = [
-  { 
-    id: 1, 
-    name: 'Spaghetti with Meat Sauce', 
-    ingredients: ['spaghetti', 'ground beef', 'tomato sauce', 'onion', 'garlic', 'olive oil', 'salt', 'pepper'], 
-    preparation: '1. Cook spaghetti according to package instructions.\n2. Heat olive oil in a large pan over medium heat. Add onion and garlic and cook until softened.\n3. Add ground beef and cook until browned. Drain any excess fat.\n4. Add tomato sauce and bring to a simmer.\n5. Season with salt and pepper to taste.\n6. Serve meat sauce over cooked spaghetti.', 
-    calories: 350, 
-    protein: 25, 
-    fat: 12, 
-    carbs: 30 
-  },
-  { 
-    id: 2, 
-    name: 'Grilled Chicken Salad', 
-    ingredients: ['chicken breast', 'romaine lettuce', 'cherry tomatoes', 'cucumber', 'red onion', 'feta cheese', 'olive oil', 'red wine vinegar', 'salt', 'pepper'], 
-    preparation: '1. Season chicken breasts with salt and pepper. Grill or bake until cooked through.\n2. Cut lettuce into bite-sized pieces and place in a large bowl.\n3. Add cherry tomatoes, sliced cucumber, sliced red onion, and crumbled feta cheese.\n4. Slice cooked chicken and add to the bowl.\n5. In a small bowl, whisk together olive oil, red wine vinegar, salt, and pepper to make the dressing.\n6. Drizzle dressing over salad and toss to combine.', 
-    calories: 400, 
-    protein: 40, 
-    fat: 20, 
-    carbs: 15 
-  }
-];
-
-// GET method to retrieve all recipes
-app.get('/recipes', (req, res) => {
-  res.json(recipes);
-});
-
-// GET method to retrieve a single recipe by ID
-app.get('/recipes/:id', (req, res) => {
-  const recipe = recipes.find(r => r.id === parseInt(req.params.id));
-  if (!recipe) {
-    return res.status(404).send('Recipe not found');
-  }
-  res.json(recipe);
-});
-
-// POST method to create a new recipe
 app.post('/recipes', (req, res) => {
-  const recipe = {
-    id: recipes.length + 1,
-    name: req.body.name,
-    ingredients: req.body.ingredients,
-    preparation: req.body.preparation,
-    calories: req.body.calories,
-    protein: req.body.protein,
-    fat: req.body.fat,
-    carbs: req.body.carbs
-  };
-  recipes.push(recipe);
-  res.json(recipe);
+  const newRecipe = req.body; // Get the new recipe data from the request body
+
+  // Read the current recipes data from the file
+  fs.readFile('models/recipes.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading recipe data"});
+      return;
+    }
+
+    // Parse the current recipes data from the file
+    const recipes = JSON.parse(data).recipes;
+
+    // Generate a new ID for the recipe
+    const newRecipeId = recipes.length + 1;
+
+    // Create a new recipe object with the new ID
+    const newRecipeWithId = {
+      id: newRecipeId,
+      name: newRecipe.name,
+      ingredients: newRecipe.ingredients,
+      preparation: newRecipe.preparation,
+      calories: newRecipe.calories,
+      protein: newRecipe.protein,
+      fat: newRecipe.fat,
+      carbs: newRecipe.carbs
+    };
+
+    // Add the new recipe to the recipes array
+    recipes.push(newRecipeWithId);
+
+    // Write the updated recipes data back to the file
+    fs.writeFile('models/recipes.json', JSON.stringify({ recipes }), 'utf8', (err) => {
+      if (err) {
+        // If there is an error writing the file, return an error message
+        res.status(500).json({error: "Error writing recipe data"});
+        return;
+      }
+
+      // If the write is successful, return the new recipe data
+      res.json(newRecipeWithId);
+    });
+  });
 });
 
-// PUT method to update a recipe by ID
+app.put('/users/:id', (req, res) => {
+  const userId = parseInt(req.params.id); // Get the user ID from the request URL
+  const updatedUser = req.body; // Get the updated user data from the request body
+
+  // Read the current users data from the file
+  fs.readFile('models/users.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading user data"});
+      return;
+    }
+
+    // Parse the current users data from the file
+    const users = JSON.parse(data).users;
+
+    // Find the index of the user with the specified ID
+    const userIndex = users.findIndex(user => user.id === userId);
+
+    if (userIndex === -1) {
+      // If the user with the specified ID is not found, return a 404 error
+      res.status(404).json({error: "User not found"});
+      return;
+    }
+
+    // Update the user with the new data
+    const updatedUserWithId = {
+      id: userId,
+      name: updatedUser.name,
+      surname: updatedUser.surname,
+      gender: updatedUser.gender,
+      height: updatedUser.height,
+      weight: updatedUser.weight,
+      email: updatedUser.email,
+      password: updatedUser.password
+    };
+
+    users[userIndex] = updatedUserWithId;
+
+    // Write the updated users data back to the file
+    fs.writeFile('models/users.json', JSON.stringify({ users }), 'utf8', (err) => {
+      if (err) {
+        // If there is an error writing the file, return an error message
+        res.status(500).json({error: "Error writing user data"});
+        return;
+      }
+
+      // If the write is successful, return the updated user data
+      res.json(updatedUserWithId);
+    });
+  });
+});
+
 app.put('/recipes/:id', (req, res) => {
-  let recipe = recipes.find(r => r.id === parseInt(req.params.id));
-  if (!recipe) {
-    return res.status(404).send('Recipe not found');
-  }
-  recipe.name = req.body.name;
-  recipe.ingredients = req.body.ingredients;
-  recipe.preparation = req.body.preparation;
-  recipe.calories = req.body.calories;
-  recipe.protein = req.body.protein;
-  recipe.fat = req.body.fat;
-  recipe.carbs = req.body.carbs;
-  res.json(recipe);
+  const recipeId = parseInt(req.params.id); // Get the recipe ID from the request URL
+  const updatedRecipe = req.body; // Get the updated recipe data from the request body
+
+  // Read the current recipes data from the file
+  fs.readFile('models/recipes.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading recipe data"});
+      return;
+    }
+
+    // Parse the current recipes data from the file
+    const recipes = JSON.parse(data).recipes;
+
+    // Find the index of the recipe with the specified ID
+    const recipeIndex = recipes.findIndex(recipe => recipe.id === recipeId);
+
+    if (recipeIndex === -1) {
+      // If the recipe with the specified ID is not found, return a 404 error
+      res.status(404).json({error: "Recipe not found"});
+      return;
+    }
+
+    // Update the recipe with the new data
+    const updatedRecipeWithId = {
+      id: recipeId,
+      name: updatedRecipe.name,
+      ingredients: updatedRecipe.ingredients,
+      preparation: updatedRecipe.preparation,
+      calories: updatedRecipe.calories,
+      protein: updatedRecipe.protein,
+      fat: updatedRecipe.fat,
+      carbs: updatedRecipe.carbs
+    };
+    recipes[recipeIndex] = updatedRecipeWithId;
+
+    // Write the updated recipes data back to the file
+    fs.writeFile('models/recipes.json', JSON.stringify({ recipes }), 'utf8', (err) => {
+      if (err) {
+        // If there is an error writing the file, return an error message
+        res.status(500).json({error: "Error writing recipe data"});
+        return;
+      }
+
+      // If the write is successful, return the updated recipe data
+      res.json(updatedRecipeWithId);
+    });
+  });
 });
 
-// DELETE method to delete a recipe by ID
+
+app.delete('/users/:id', (req, res) => {
+  const userId = req.params.id; // Get the user ID from the request parameter
+  fs.readFile('models/users.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading user data"});
+      return;
+    }
+    const users = JSON.parse(data).users;
+    const userIndex = users.findIndex(user => user.id == userId); // Find the user index with the matching ID
+
+    // Check if the user exists
+    if (userIndex > -1) {
+      // If the user exists, remove it from the array
+      users.splice(userIndex, 1);
+
+      // Write the updated users data back to the file
+      fs.writeFile('models/users.json', JSON.stringify({users}), 'utf8', (err) => {
+        if (err) {
+          // If there is an error writing the file, return an error message
+          res.status(500).json({error: "Error writing user data"});
+          return;
+        }
+
+        // If the write is successful, return a success message
+        res.json({message: "User deleted successfully"});
+      });
+    } else {
+      // If the user does not exist, return an error message
+      res.status(404).json({error: "User not found"});
+    }
+  });
+});
+
+
 app.delete('/recipes/:id', (req, res) => {
-  const index = recipes.findIndex(r => r.id === parseInt(req.params.id));
-  if (index === -1) {
-    return res.status(404).send('Recipe not found');
-  }
-  recipes.splice(index, 1);
-  res.sendStatus(204);
+  const recipeId = req.params.id; // Get the recipe ID from the request parameter
+  fs.readFile('models/recipes.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading recipe data"});
+      return;
+    }
+    const recipes = JSON.parse(data).recipes;
+    const recipeIndex = recipes.findIndex(recipe => recipe.id == recipeId); // Find the recipe index with the matching ID
+
+    // Check if the recipe exists
+    if (recipeIndex > -1) {
+      // If the recipe exists, remove it from the array
+      recipes.splice(recipeIndex, 1);
+
+      // Write the updated recipes data back to the file
+      fs.writeFile('models/recipes.json', JSON.stringify({recipes}), 'utf8', (err) => {
+        if (err) {
+          // If there is an error writing the file, return an error message
+          res.status(500).json({error: "Error writing recipe data"});
+          return;
+        }
+
+        // If the write is successful, return a success message
+        res.json({message: "Recipe deleted successfully"});
+      });
+    } else {
+      // If the recipe does not exist, return an error message
+      res.status(404).json({error: "Recipe not found"});
+    }
+  });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+
+app.listen(3001, () => {
+  console.log('Server started on port 3000');
 });
 
+// var server = app.listen(3000, function () {
+//   var host = server.address().address
+// //   var port = server.address().port
+//   console.log("Example app listening at http://%s:%s", host, port)
+// })
