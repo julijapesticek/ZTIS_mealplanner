@@ -1,14 +1,23 @@
 var express = require('express');
 var app = express();
 var fs = require("fs");
+const cors = require('cors');
 
 
-// Use the built-in express.json() middleware to parse incoming JSON requests
+app.use(cors());
 app.use(express.json());
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
 
+//USERS
 var users = "models/users.json"
 
+//IZPIŠI VSE UPORABNIKE
 app.get('/listUsers', function (req, res) {
    fs.readFile("models/users.json", 'utf8', function (err, data) {
       console.log( data );
@@ -16,8 +25,8 @@ app.get('/listUsers', function (req, res) {
    });
 })
 
-
-app.get('/users/:id', (req, res) => {
+//IZPIŠI DOLOČENEGA UPORABNIKA
+app.get('/user/:id', (req, res) => {
    const userId = req.params.id; // Get the user ID from the request parameter
    fs.readFile('models/users.json', 'utf8', (err, data) => {
      if (err) {
@@ -39,7 +48,8 @@ app.get('/users/:id', (req, res) => {
    });
  });
 
- app.post('/users', (req, res) => {
+ //DODAJ UPORABNIKA
+ app.post('/addUser', (req, res) => {
   const newUser = req.body; // Get the new user data from the request body
 
   // Read the current users data from the file
@@ -85,60 +95,8 @@ app.get('/users/:id', (req, res) => {
   });
 });
 
-app.get('/listRecipes', function (req, res) {
-  fs.readFile("models/recipes.json", 'utf8', function (err, data) {
-     console.log( data );
-     res.end( data );
-  });
-})
-
-app.post('/recipes', (req, res) => {
-  const newRecipe = req.body; // Get the new recipe data from the request body
-
-  // Read the current recipes data from the file
-  fs.readFile('models/recipes.json', 'utf8', (err, data) => {
-    if (err) {
-      // If there is an error reading the file, return an error message
-      res.status(500).json({error: "Error reading recipe data"});
-      return;
-    }
-
-    // Parse the current recipes data from the file
-    const recipes = JSON.parse(data).recipes;
-
-    // Generate a new ID for the recipe
-    const newRecipeId = recipes.length + 1;
-
-    // Create a new recipe object with the new ID
-    const newRecipeWithId = {
-      id: newRecipeId,
-      name: newRecipe.name,
-      ingredients: newRecipe.ingredients,
-      preparation: newRecipe.preparation,
-      calories: newRecipe.calories,
-      protein: newRecipe.protein,
-      fat: newRecipe.fat,
-      carbs: newRecipe.carbs
-    };
-
-    // Add the new recipe to the recipes array
-    recipes.push(newRecipeWithId);
-
-    // Write the updated recipes data back to the file
-    fs.writeFile('models/recipes.json', JSON.stringify({ recipes }), 'utf8', (err) => {
-      if (err) {
-        // If there is an error writing the file, return an error message
-        res.status(500).json({error: "Error writing recipe data"});
-        return;
-      }
-
-      // If the write is successful, return the new recipe data
-      res.json(newRecipeWithId);
-    });
-  });
-});
-
-app.put('/users/:id', (req, res) => {
+//UREDI DOLOČENEGA UPORABNIKA
+app.put('/updateUser/:id', (req, res) => {
   const userId = parseInt(req.params.id); // Get the user ID from the request URL
   const updatedUser = req.body; // Get the updated user data from the request body
 
@@ -190,7 +148,123 @@ app.put('/users/:id', (req, res) => {
   });
 });
 
-app.put('/recipes/:id', (req, res) => {
+//IZBRIŠI UPORABNIKA
+app.delete('/deleteUser/:id', (req, res) => {
+  const userId = req.params.id; // Get the user ID from the request parameter
+  fs.readFile('models/users.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading user data"});
+      return;
+    }
+    const users = JSON.parse(data).users;
+    const userIndex = users.findIndex(user => user.id == userId); // Find the user index with the matching ID
+
+    // Check if the user exists
+    if (userIndex > -1) {
+      // If the user exists, remove it from the array
+      users.splice(userIndex, 1);
+
+      // Write the updated users data back to the file
+      fs.writeFile('models/users.json', JSON.stringify({users}), 'utf8', (err) => {
+        if (err) {
+          // If there is an error writing the file, return an error message
+          res.status(500).json({error: "Error writing user data"});
+          return;
+        }
+
+        // If the write is successful, return a success message
+        res.json({message: "User deleted successfully"});
+      });
+    } else {
+      // If the user does not exist, return an error message
+      res.status(404).json({error: "User not found"});
+    }
+  });
+});
+
+
+//RECEPTI
+//IZPIŠI VSE RECEPTE
+app.get('/listRecipes', function (req, res) {
+  fs.readFile("models/recipes.json", 'utf8', function (err, data) {
+     console.log( data );
+     res.end( data );
+  });
+})
+
+//IZPIŠI DOLOČEN RECEPT
+app.get('/recipe/:id', (req, res) => {
+  const recipeId = req.params.id; // Get the user ID from the request parameter
+  fs.readFile('models/recipes.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading recipe data"});
+      return;
+    }
+    const recipes = JSON.parse(data).recipes;
+    const recipe = recipes.find(recipe => recipe.id == recipeId); // Find the recpie with the matching ID
+
+    // Check if the recipe exists
+    if (recipe) {
+      // If the recipe exists, return their data
+      res.json(recipe);
+    } else {
+      // If the recipe does not exist, return an error message
+      res.status(404).json({error: "Recipe not found"});
+    }
+  });
+});
+
+//DODAJ RECEPT
+app.post('/addRecipe', (req, res) => {
+  const newRecipe = req.body; // Get the new recipe data from the request body
+
+  // Read the current recipes data from the file
+  fs.readFile('models/recipes.json', 'utf8', (err, data) => {
+    if (err) {
+      // If there is an error reading the file, return an error message
+      res.status(500).json({error: "Error reading recipe data"});
+      return;
+    }
+
+    // Parse the current recipes data from the file
+    const recipes = JSON.parse(data).recipes;
+
+    // Generate a new ID for the recipe
+    const newRecipeId = recipes.length + 1;
+
+    // Create a new recipe object with the new ID
+    const newRecipeWithId = {
+      id: newRecipeId,
+      name: newRecipe.name,
+      ingredients: newRecipe.ingredients,
+      preparation: newRecipe.preparation,
+      calories: newRecipe.calories,
+      protein: newRecipe.protein,
+      fat: newRecipe.fat,
+      carbs: newRecipe.carbs
+    };
+
+    // Add the new recipe to the recipes array
+    recipes.push(newRecipeWithId);
+
+    // Write the updated recipes data back to the file
+    fs.writeFile('models/recipes.json', JSON.stringify({ recipes }), 'utf8', (err) => {
+      if (err) {
+        // If there is an error writing the file, return an error message
+        res.status(500).json({error: "Error writing recipe data"});
+        return;
+      }
+
+      // If the write is successful, return the new recipe data
+      res.json(newRecipeWithId);
+    });
+  });
+});
+
+//UREDI RECEPT
+app.put('/updateRecipe/:id', (req, res) => {
   const recipeId = parseInt(req.params.id); // Get the recipe ID from the request URL
   const updatedRecipe = req.body; // Get the updated recipe data from the request body
 
@@ -241,43 +315,8 @@ app.put('/recipes/:id', (req, res) => {
   });
 });
 
-
-app.delete('/users/:id', (req, res) => {
-  const userId = req.params.id; // Get the user ID from the request parameter
-  fs.readFile('models/users.json', 'utf8', (err, data) => {
-    if (err) {
-      // If there is an error reading the file, return an error message
-      res.status(500).json({error: "Error reading user data"});
-      return;
-    }
-    const users = JSON.parse(data).users;
-    const userIndex = users.findIndex(user => user.id == userId); // Find the user index with the matching ID
-
-    // Check if the user exists
-    if (userIndex > -1) {
-      // If the user exists, remove it from the array
-      users.splice(userIndex, 1);
-
-      // Write the updated users data back to the file
-      fs.writeFile('models/users.json', JSON.stringify({users}), 'utf8', (err) => {
-        if (err) {
-          // If there is an error writing the file, return an error message
-          res.status(500).json({error: "Error writing user data"});
-          return;
-        }
-
-        // If the write is successful, return a success message
-        res.json({message: "User deleted successfully"});
-      });
-    } else {
-      // If the user does not exist, return an error message
-      res.status(404).json({error: "User not found"});
-    }
-  });
-});
-
-
-app.delete('/recipes/:id', (req, res) => {
+//IZBRIŠI RECEPT
+app.delete('/deleteRecipe/:id', (req, res) => {
   const recipeId = req.params.id; // Get the recipe ID from the request parameter
   fs.readFile('models/recipes.json', 'utf8', (err, data) => {
     if (err) {

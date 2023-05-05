@@ -1,1 +1,1 @@
-{"users":[{"id":1,"name":"John","surname":"Doe","gender":"male","height":180,"weight":75,"email":"john.doe@example.com","password":"john1"}]}
+{"users":[{"id":1,"name":"Julija","surname":"Pestiček","gender":"female","height":"180","weight":"60","email":"julija@example.com","password":"julija123"},{"id":2,"name":"Branko","surname":"Pestiček","gender":"male","height":"196","weight":"86","email":"branko@gmail.com","password":"branko123"}]}
