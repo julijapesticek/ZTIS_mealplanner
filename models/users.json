@@ -1,1 +1,24 @@
-{"users":[{"id":1,"name":"Julija","surname":"Pestiček","gender":"female","height":"180","weight":"60","email":"julija@example.com","password":"julija123"},{"id":2,"name":"Branko","surname":"Pestiček","gender":"male","height":"196","weight":"86","email":"branko@gmail.com","password":"branko123"}]}
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "Julija",
+            "surname": "Pestiček",
+            "gender": "Female",
+            "height": "180",
+            "weight": "60",
+            "email": "julija@example.com",
+            "password": "julija123"
+        },
+        {
+            "id": 2,
+            "name": "Branko",
+            "surname": "Pestiček",
+            "gender": "Male",
+            "height": "196",
+            "weight": "86",
+            "email": "branko@gmail.com",
+            "password": "branko123"
+        }
+    ]
+}
