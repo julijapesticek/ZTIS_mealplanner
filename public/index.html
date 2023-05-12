@@ -2,42 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="https://w7.pngwing.com/pngs/269/407/png-transparent-earth-globe-world-logo-earth-globe-logo-world.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
       content="Web site created using create-react-app"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <link rel="apple-touch-icon" href="https://w7.pngwing.com/pngs/269/407/png-transparent-earth-globe-world-logo-earth-globe-logo-world.png" />
+    
+    <title>Meal planner</title>
   </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+  <body class="container col-10">
+    <h1 class ="header">Meal planner</h1>
+    <div class="row justify-content-center" >
+      <div class="col-2">
+        <Button id="toggle-dark-mode" class="gumb">Dark Mode</Button>
+        <!-- <Button id="getRecipes" class="gumb">List recipes</Button> -->
+      </div>
+    </div>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    
+    <form id="recipeForm">
+      <label for="recipeId">Recipe Id:</label>
+      <input type="text" id="recipeId">
+      <label for="recipeName">Recipe Name:</label>
+      <input type="text" id="recipeName">
+      <label for="ingredients">Ingredients:</label>
+      <textarea id="ingredients"></textarea>
+      <label for="preparation">Preparation:</label>
+      <textarea id="preparation"></textarea>
+      <label for="calories">calories:</label>
+      <input type="text" id="calories">
+      <label for="protein">protein:</label>
+      <input type="text" id="protein">
+      <label for="fat">fat:</label>
+      <input type="text" id="fat">
+      <label for="carbs">carbs:</label>
+      <input type="text" id="carbs">
+      <button id="submitButton" type="submit">Add Recipe</button>
+      <button id="cancelButton">Cancel</button>
+      <button id="deleteButton">Delete</button>
+      <label for="searchInput">Search:</label>
+      <input type="text" id="searchInput">
+      <button id="searchButton">Search</button>
+    </form>
+    <table id="recipeTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Ingredients</th>
+          <th>Preparation</th>
+          <th>Calories</th>
+          <th>Protein</th>
+          <th>Fat</th>
+          <th>Carbs</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="recipeTableBody"></tbody>
+    </table>
+    
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <script src="renderer.js"></script>
   </body>
 </html>
