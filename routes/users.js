@@ -1,6 +1,7 @@
 const User = require('../models/users');
 const express = require('express');
 const router = express.Router();
+const emailRoutes = require('./emailRegistration');
 
 // FIND ALL USERS
 router.route('/listUsers').get(async (req, res) => {
@@ -29,6 +30,8 @@ router.route('/addUser').post(async (req, res) => {
     try {
         const user = new User(req.body);
         await user.save();
+        //console.log('User', user);
+        emailRoutes.sendEmail(user);
         let userUri =
             `${req.protocol}://${req.headers.host}${req.originalUrl}/${user._id}`;
         res.location(userUri).json(user);
