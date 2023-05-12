@@ -1,6 +1,7 @@
 const Recipe = require('../models/recipes');
 const express = require('express');
 const router = express.Router();
+const { recipeSchema } = require('../helpers/validation_schema');
 
 // FIND ALL RECIPES
 router.route('/listRecipes').get(async (req, res) => {
@@ -27,12 +28,14 @@ router.route('/recipe/:id').get(async (req, res) => {
 // ADD RECIPE
 router.route('/addRecipe').post(async (req, res) => {
     try {
-        const recipe = new Recipe(req.body);
+        const result = await recipeSchema.validateAsync(req.body);
+        const recipe = new Recipe(result);
         await recipe.save();
         let recipeUri =
             `${req.protocol}://${req.headers.host}${req.originalUrl}/${recipe._id}`;
         res.location(recipeUri).json(recipe);
     } catch (err) {
+        if (err.isJoi === true) err.status = 422;
         res.status(500).send(err);
     }
 });

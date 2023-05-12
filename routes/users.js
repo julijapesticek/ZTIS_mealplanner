@@ -2,6 +2,7 @@ const User = require('../models/users');
 const express = require('express');
 const router = express.Router();
 const emailRoutes = require('./emailRegistration');
+const { userSchema } = require('../helpers/validation_schema');
 
 // FIND ALL USERS
 router.route('/listUsers').get(async (req, res) => {
@@ -28,14 +29,22 @@ router.route('/user/:id').get(async (req, res) => {
 // ADD USER
 router.route('/addUser').post(async (req, res) => {
     try {
-        const user = new User(req.body);
+        //const user = new User(req.body);
+        const result = await userSchema.validateAsync(req.body);
+
+        // const doesExist = await User.findOne({ email: result.email });
+        // if (doesExist)
+        //     throw res.status(404).json({ msg: `${result.email} je že zaseden.` });
+
+        const user = new User(result);
         await user.save();
-        //console.log('User', user);
+        
         emailRoutes.sendEmail(user);
         let userUri =
             `${req.protocol}://${req.headers.host}${req.originalUrl}/${user._id}`;
         res.location(userUri).json(user);
     } catch (err) {
+        if (err.isJoi === true) err.status = 422;
         res.status(500).send(err);
     }
 });
