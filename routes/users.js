@@ -2,7 +2,8 @@ const User = require('../models/users');
 const express = require('express');
 const router = express.Router();
 const emailRoutes = require('./emailRegistration');
-const { userSchema } = require('../helpers/validation_schema');
+const { userSchema, loginSchema } = require('../helpers/validation_schema');
+const { signAccessToken, verifyAccessToken } = require('../helpers/jwt_helper');
 
 // FIND ALL USERS
 router.route('/listUsers').get(async (req, res) => {
@@ -32,14 +33,16 @@ router.route('/addUser').post(async (req, res) => {
         //const user = new User(req.body);
         const result = await userSchema.validateAsync(req.body);
 
-        // const doesExist = await User.findOne({ email: result.email });
-        // if (doesExist)
-        //     throw res.status(404).json({ msg: `${result.email} je že zaseden.` });
+        const doesExist = await User.findOne({ email: result.email });
+        if (doesExist)
+            throw res.status(404).json({ msg: `${result.email} je že zaseden.` });
 
         const user = new User(result);
         await user.save();
-        
-        emailRoutes.sendEmail(user);
+
+        //LARA TO POPRAVIIIIII
+        //emailRoutes.sendEmail(user);
+
         let userUri =
             `${req.protocol}://${req.headers.host}${req.originalUrl}/${user._id}`;
         res.location(userUri).json(user);
@@ -49,9 +52,30 @@ router.route('/addUser').post(async (req, res) => {
     }
 });
 
+//LOGIN OF USER
+router.route('/login').post(async (req, res) => {
+    try {
+        const result = await loginSchema.validateAsync(req.body);
+        const user = await User.findOne({ email: result.email });
+        if (!user) {
+            return res.status(401).json({ error: 'User not registered' });
+        }
+        const isMatch = await user.comparePassword(result.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const accessToken = await signAccessToken(user.id);
+
+        res.json({ message: 'Login successful', 'AccessToken:': accessToken });
+    } catch (err) {
+        if (err.isJoi === true) err.status = 422;
+        res.status(500).send(err);
+    }
+});
 
 // PUT USER
-router.route('/updateUser/:id').put(async (req, res) => {
+router.route('/updateUser/:id').put(verifyAccessToken, async (req, res) => {
     if (req.params.id !== req.body._id) {
         res.status(400).json('IDja nista enaka!')
     } else {
@@ -76,13 +100,14 @@ router.route('/updateUser/:id').put(async (req, res) => {
 
 
 // DELETE USER
-router.route('/deleteUser/:id').delete(async (req, res) => {
+router.route('/deleteUser/:id').delete(verifyAccessToken, async (req, res) => {
     try {
         const brisi = await
             User.findByIdAndDelete(req.params.id);
         if (!brisi) {
             res.status(404).json({
-                msg: `User z id=${req.params.id} ni bil najden` });
+                msg: `User z id=${req.params.id} ni bil najden`
+            });
         } else {
             res.status(200).json({ msg: 'User je bil izbrisan' });
         }

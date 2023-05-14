@@ -10,6 +10,11 @@ const userSchema = Joi.object({
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
 });
 
+const loginSchema = Joi.object({
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'si', 'org'] } }).lowercase().required(),
+    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
+});
+
 const recipeSchema = Joi.object({
     name: Joi.string().min(2).required(),
     ingredients: Joi.array().items(Joi.string()).min(1).required(),
@@ -22,5 +27,6 @@ const recipeSchema = Joi.object({
 
 module.exports = {
     userSchema,
+    loginSchema,
     recipeSchema
 }

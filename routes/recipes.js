@@ -2,6 +2,7 @@ const Recipe = require('../models/recipes');
 const express = require('express');
 const router = express.Router();
 const { recipeSchema } = require('../helpers/validation_schema');
+const { verifyAccessToken } = require('../helpers/jwt_helper');
 
 // FIND ALL RECIPES
 router.route('/listRecipes').get(async (req, res) => {
@@ -26,7 +27,7 @@ router.route('/recipe/:id').get(async (req, res) => {
 });
 
 // ADD RECIPE
-router.route('/addRecipe').post(async (req, res) => {
+router.route('/addRecipe').post(verifyAccessToken, async (req, res) => {
     try {
         const result = await recipeSchema.validateAsync(req.body);
         const recipe = new Recipe(result);
@@ -41,7 +42,7 @@ router.route('/addRecipe').post(async (req, res) => {
 });
 
 // PUT RECIPE
-router.route('/updateRecipe/:id').put(async (req, res) => {
+router.route('/updateRecipe/:id').put(verifyAccessToken, async (req, res) => {
     if (req.params.id !== req.body._id) {
         res.status(400).json('IDja nista enaka!')
     } else {
@@ -66,7 +67,7 @@ router.route('/updateRecipe/:id').put(async (req, res) => {
 });
 
 // DELETE RECIPE
-router.route('/deleteRecipe/:id').delete(async (req, res) => {
+router.route('/deleteRecipe/:id').delete(verifyAccessToken, async (req, res) => {
     try {
         const brisi = await
             Recipe.findByIdAndDelete(req.params.id);
