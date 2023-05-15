@@ -54,4 +54,14 @@ module.exports = {
             });
         });
     },
+
+    verifyRefreshToken: (refreshToken) => {
+        return new Promise((resolve, reject) => {
+            JWT.verify(refreshToken, 'ST_RefreshSecret', (err, payload) => {
+                if (err) return reject(createError.Unauthorized());
+                const userId = payload.aud;
+                resolve(userId);
+            });
+        });
+    }
 }

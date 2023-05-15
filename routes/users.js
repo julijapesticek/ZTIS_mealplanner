@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const emailRoutes = require('./emailRegistration');
 const { userSchema, loginSchema } = require('../helpers/validation_schema');
-const { signAccessToken, verifyAccessToken, signRefreshToken } = require('../helpers/jwt_helper');
+const { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } = require('../helpers/jwt_helper');
 
 // FIND ALL USERS
 router.route('/listUsers').get(async (req, res) => {
@@ -72,6 +72,22 @@ router.route('/login').post(async (req, res) => {
     } catch (err) {
         if (err.isJoi === true) err.status = 422;
         res.status(500).send(err);
+    }
+});
+
+// REFRESH TOKEN
+router.route('/refreshToken').post(async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) throw res.status(400).json({ error: 'Bad request' });
+        const userId = await verifyRefreshToken(refreshToken);
+
+        const accessToken = await signAccessToken(userId);
+        const refToken = await signRefreshToken(userId);
+
+        res.json({ 'AccessToken:': accessToken, 'RefreshToken:': refToken });
+    } catch (err) {
+        next(err);
     }
 });
 
