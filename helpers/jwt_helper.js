@@ -22,10 +22,20 @@ module.exports = {
     },
 
     verifyAccessToken: (req, res, next) => {
-        if (!req.headers['authorization']) return next(createError.Unauthorized());
-        const authHeader = req.headers['authorization'];
-        const bearerToken = authHeader.split(' ');
-        const token = bearerToken[1];
+        // if (!req.headers['authorization']) return next(createError.Unauthorized());
+        // const authHeader = req.headers['authorization'];
+        // const bearerToken = authHeader.split(' ');
+        // const token = bearerToken[1];
+        // JWT.verify(token, 'ST_AccessSecret', (err, payload) => {
+        //     if (err) {
+        //         const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
+        //         return next(createError.Unauthorized(message));
+        //     }
+        //     req.payload = payload;
+        //     next();
+        // });
+
+        const token = req.cookies.accessToken;
         JWT.verify(token, 'ST_AccessSecret', (err, payload) => {
             if (err) {
                 const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;

@@ -35,10 +35,30 @@ router.route('/addUser').post(async (req, res) => {
 
         const doesExist = await User.findOne({ email: result.email });
         if (doesExist)
-            throw res.status(404).json({ msg: `${result.email} je že zaseden.` });
+            return res.status(404).json({ msg: `${result.email} je že zaseden.` });
+
+        // const accessToken = await signAccessToken(user.id);
+        // const refreshToken = await signRefreshToken(user.id);
+
+        // res.cookie('refreshToken', refreshToken, {
+        //     httpOnly: true,
+        // });
+        // res.cookie('accessToken', accessToken, {
+        //     httpOnly: true,
+        // });
 
         const user = new User(result);
         await user.save();
+
+        const accessToken = await signAccessToken(user.id);
+        const refreshToken = await signRefreshToken(user.id);
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+        });
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+        });
 
         //LARA TO POPRAVIIIIII
         //emailRoutes.sendEmail(user);
@@ -68,7 +88,15 @@ router.route('/login').post(async (req, res) => {
         const accessToken = await signAccessToken(user.id);
         const refreshToken = await signRefreshToken(user.id);
 
-        res.json({ message: 'Login successful', 'AccessToken:': accessToken, 'RefreshToken:': refreshToken});
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+        });
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+        });
+
+
+        res.json({ message: 'Login successful', 'AccessToken:': accessToken, 'RefreshToken:': refreshToken });
     } catch (err) {
         if (err.isJoi === true) err.status = 422;
         res.status(500).send(err);
@@ -78,12 +106,19 @@ router.route('/login').post(async (req, res) => {
 // REFRESH TOKEN
 router.route('/refreshToken').post(async (req, res) => {
     try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) throw res.status(400).json({ error: 'Bad request' });
-        const userId = await verifyRefreshToken(refreshToken);
+        const token = req.cookies.refreshToken;
+        if (!token) throw res.status(400).json({ error: 'Bad request' });
+        const userId = await verifyRefreshToken(token);
 
         const accessToken = await signAccessToken(userId);
         const refToken = await signRefreshToken(userId);
+
+        res.cookie('refreshToken', refToken, {
+            httpOnly: true,
+        });
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+        });
 
         res.json({ 'AccessToken:': accessToken, 'RefreshToken:': refToken });
     } catch (err) {
@@ -92,11 +127,12 @@ router.route('/refreshToken').post(async (req, res) => {
 });
 
 // LOGOUT OF USER
-router.route('/logout').post(async (req, res) => {
+router.route('/logout').post(async (req, res, next) => {
     try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) throw res.status(400).json({ error: 'Bad request' });
-        const userId = await verifyRefreshToken(refreshToken);
+        res.cookie('accessToken', '', {maxAge: 1});
+        res.cookie('refreshToken', '', {maxAge: 1});
+
+        res.status(201).json({ msg: 'Logout successful' });
     } catch (err) {
         next(err);
     }
@@ -114,6 +150,7 @@ router.route('/updateUser/:id').put(verifyAccessToken, async (req, res) => {
             if (najdiuserja) {
                 await User.findByIdAndUpdate(req.params.id,
                     req.body);
+                //await najdiuserja.save();
                 res.status(201).json({ msg: 'User je bil posodobljen' });
             } else {
                 res.status(404).json({
@@ -125,7 +162,6 @@ router.route('/updateUser/:id').put(verifyAccessToken, async (req, res) => {
         }
     }
 });
-
 
 // DELETE USER
 router.route('/deleteUser/:id').delete(verifyAccessToken, async (req, res) => {
