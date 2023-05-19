@@ -1,8 +1,6 @@
 const { app, BrowserWindow, ipcMain, nativeTheme, remote } = require('electron');
 const path = require('path');
 
-// const apiUrl = 'http://localhost:4200/listRecipes';
-
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
@@ -15,7 +13,7 @@ const createWindow = () => {
 
   process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
-  win.loadFile('public/index.html')
+  win.loadFile('public/indexlogin.html')
 
   ipcMain.handle('dark-mode:toggle', () => {
     if (nativeTheme.shouldUseDarkColors) {
@@ -39,8 +37,8 @@ app.on('window-all-closed', () => {
   }
 });
 
-// app.on('activate', () => {
-//   if (BrowserWindow.getAllWindows().length === 0) {
-//     createWindow();
-//   }
-// });
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});

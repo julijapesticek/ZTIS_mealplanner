@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <title>Recipes</title>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="mealplan.html">Meal Plan</a></li>
+        </ul>
+    </div>
+
+    <h1>Recipes</h1>
+
+    <div id="recipeContainer"></div>
+
+    <script>
+        async function fetchRecipes() {
+            try {
+                const response = await fetch('http://localhost:3001/recipes/listRecipes');
+                const recipes = await response.json();
+
+                const recipeContainer = document.getElementById('recipeContainer');
+                recipeContainer.innerHTML = '';
+
+                recipes.forEach(recipe => {
+                    const recipeCard = document.createElement('div');
+                    recipeCard.classList.add('recipe-card');
+
+                    const name = document.createElement('h3');
+                    name.textContent = recipe.name;
+                    recipeCard.appendChild(name);
+
+                    const ingredients = document.createElement('p');
+                    ingredients.textContent = `Ingredients: ${recipe.ingredients.join(', ')}`;
+                    recipeCard.appendChild(ingredients);
+
+                    const preparation = document.createElement('p');
+                    preparation.textContent = `Preparation: ${recipe.preparation.join(', ')}`;
+                    recipeCard.appendChild(preparation);
+
+                    const calories = document.createElement('p');
+                    calories.textContent = `Calories: ${recipe.calories}`;
+                    recipeCard.appendChild(calories);
+
+                    const protein = document.createElement('p');
+                    protein.textContent = `Protein: ${recipe.protein}`;
+                    recipeCard.appendChild(protein);
+
+                    const fat = document.createElement('p');
+                    fat.textContent = `Fat: ${recipe.fat}`;
+                    recipeCard.appendChild(fat);
+
+                    const carbs = document.createElement('p');
+                    carbs.textContent = `Carbs: ${recipe.carbs}`;
+                    recipeCard.appendChild(carbs);
+                    
+
+                    const dropdown = document.createElement('div');
+                    dropdown.classList.add('dropdown');
+                    recipeCard.appendChild(dropdown);
+
+                    const dropdownButton = document.createElement('button');
+                    dropdownButton.textContent = 'Add to Day';
+                    dropdownButton.classList.add('dropbtn');
+                    dropdown.appendChild(dropdownButton);
+
+                    const dropdownContent = document.createElement('div');
+                    dropdownContent.classList.add('dropdown-content');
+                    dropdown.appendChild(dropdownContent);
+
+                    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                    daysOfWeek.forEach(day => {
+                        const dayLink = document.createElement('a');
+                        dayLink.textContent = day;
+                        dayLink.href = `mealplan.html?recipe=${recipe.name}&day=${day}`;
+                        dropdownContent.appendChild(dayLink);
+                    });
+
+                    recipeContainer.appendChild(recipeCard);
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        fetchRecipes();
+    </script>
+</body>
+
+</html>
