@@ -13,6 +13,7 @@
         <ul>
             <li><a href="homepage.html">Home</a></li>
             <li><a href="#">Meal Plan</a></li>
+            <Button id="toggle-dark-mode" class="gumb">Dark Mode</Button>
         </ul>
     </div>
 
@@ -59,6 +60,23 @@
     </div>
 
     <script>
+
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = window.localStorage.getItem('accessToken');
+            const refreshToken = window.localStorage.getItem('refreshToken');
+
+            console.log(accessToken, refreshToken);
+
+            if (!accessToken || !refreshToken) {
+                window.location.href = 'login.html';
+            }
+            // else {
+                
+            // }
+        
+    });
+
     </script>
 </body>
 

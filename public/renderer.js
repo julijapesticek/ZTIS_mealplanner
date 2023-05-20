@@ -3,7 +3,6 @@ document.getElementById('toggle-dark-mode').addEventListener('click', async () =
 })
 
 // Get all recipes from the server
-
 const xhr = new XMLHttpRequest();
 
 xhr.open('GET', 'http://localhost:3001/recipes/listRecipes');
@@ -93,7 +92,6 @@ const submitButton = document.getElementById('submitButton');
 
 
 // SUBMIT FORM -> ADD OR UPDATE RECIPE
-
 const urlParams = new URLSearchParams(window.location.search);
 const recipeId = urlParams.get('id');
 if (recipeId) {
@@ -125,16 +123,13 @@ recipeForm.addEventListener('submit', event => {
   const recipeId = recipeIdInput.value;
 
   if (recipeId) {
-    // Update an existing recipe
     updateRecipe(recipeId, recipeName, recipeIngredients, recipePreparation, recipeCalories, recipeProtein, recipeFat, recipeCarbs);
   } else {
-    // Add a new recipe
     addRecipe(recipeName, recipeIngredients, recipePreparation, recipeCalories, recipeProtein, recipeFat, recipeCarbs);
   }
 });
 
 // PUT
-
 const addRecipe = (name, ingredients, preparation, calories, protein, fat, carbs) => {
   fetch('http://localhost:3001/recipes/addRecipe', {
     method: 'POST',
@@ -163,8 +158,7 @@ const addRecipe = (name, ingredients, preparation, calories, protein, fat, carbs
   .catch(error => console.error(error));
 };
 
-// UPDATE
-
+// UPDATE RECIPE
 const updateRecipe = (recipeId, name, ingredients, preparation, calories, protein, fat, carbs) => {
   fetch(`http://localhost:3001/recipes/updateRecipe/${recipeId}`, {
     method: 'PUT',
@@ -196,7 +190,6 @@ const updateRecipe = (recipeId, name, ingredients, preparation, calories, protei
 
 
 // DELETE RECIPE
-
 function deleteRecipe() {
   const recipeId = document.getElementById("recipeId").value;
   fetch(`http://localhost:3001/recipes/deleteRecipe/${recipeId}`, {

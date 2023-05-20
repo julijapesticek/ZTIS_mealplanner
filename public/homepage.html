@@ -13,6 +13,8 @@
         <ul>
             <li><a href="#">Home</a></li>
             <li><a href="mealplan.html">Meal Plan</a></li>
+            <Button id="toggle-dark-mode" class="gumb">Dark Mode</Button>
+            <button id="logoutButton">Logout</button>
         </ul>
     </div>
 
@@ -23,12 +25,11 @@
     <script>
         async function fetchRecipes() {
             try {
+                // FETCH RECIPES
                 const response = await fetch('http://localhost:3001/recipes/listRecipes');
                 const recipes = await response.json();
 
-                const recipeContainer = document.getElementById('recipeContainer');
-                recipeContainer.innerHTML = '';
-
+                // RECIPE CARDS
                 recipes.forEach(recipe => {
                     const recipeCard = document.createElement('div');
                     recipeCard.classList.add('recipe-card');
@@ -61,7 +62,7 @@
                     carbs.textContent = `Carbs: ${recipe.carbs}`;
                     recipeCard.appendChild(carbs);
                     
-
+                    // ADD TO DAY DROPDOWN
                     const dropdown = document.createElement('div');
                     dropdown.classList.add('dropdown');
                     recipeCard.appendChild(dropdown);
@@ -85,13 +86,45 @@
                     });
 
                     recipeContainer.appendChild(recipeCard);
+
                 });
             } catch (error) {
                 console.log(error);
             }
         }
 
-        fetchRecipes();
+        // TOKENS
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = window.localStorage.getItem('accessToken');
+            const refreshToken = window.localStorage.getItem('refreshToken');
+
+            console.log(accessToken, refreshToken);
+
+            if (!accessToken || !refreshToken) {
+                window.location.href = 'login.html';
+            }
+            else {
+                fetchRecipes();
+            }
+    });
+
+    // LOGOUT
+    const logoutButton = document.getElementById('logoutButton');
+
+    logoutButton.addEventListener('click', async () => {
+        const response = await fetch('http://localhost:3001/users/logout', {
+            method: 'POST',
+        });
+
+        if (response.ok) {
+            alert('Logout successful');
+            // Redirect to the login page or any other desired page
+            window.location.href = 'login.html';
+        } else {
+            const data = await response.json();
+            alert(data.error);
+        }
+    });
     </script>
 </body>
 

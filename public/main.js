@@ -13,7 +13,7 @@ const createWindow = () => {
 
   process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
-  win.loadFile('public/indexlogin.html')
+  win.loadFile('public/login.html')
 
   ipcMain.handle('dark-mode:toggle', () => {
     if (nativeTheme.shouldUseDarkColors) {
