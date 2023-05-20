@@ -47,13 +47,19 @@
                 const refreshToken = data['RefreshToken:'];
                 console.log(accessToken, refreshToken);
 
-                alert('Login successful');
                 window.localStorage.setItem('accessToken', accessToken);
                 window.localStorage.setItem('refreshToken', refreshToken);
+
+                if (data.message === 'Admin login successful') {
+                alert('Logout successful');
+                window.location.href = 'admin.html';
+                } else {
+                alert('Logout successful');
                 window.location.href = 'homepage.html';
+                }
             } else {
                 alert(data.error);
-            }
+  }
         });
     </script>
 </body>

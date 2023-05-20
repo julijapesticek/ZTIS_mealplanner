@@ -1,7 +1,3 @@
-document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
-  const isDarkMode = await window.darkMode.toggle();
-})
-
 // Get all recipes from the server
 const xhr = new XMLHttpRequest();
 
@@ -148,7 +144,7 @@ const addRecipe = (name, ingredients, preparation, calories, protein, fat, carbs
   })
   .then(response => {
     if (response.ok) {
-      console.log('Recipe added successfully');
+      alert('Recipe added successfully');
       // Redirect to the recipe list page
       window.location.reload();
     } else {
@@ -178,7 +174,7 @@ const updateRecipe = (recipeId, name, ingredients, preparation, calories, protei
   })
   .then(response => {
     if (response.ok) {
-      console.log('Recipe updated successfully');
+      alert('Recipe updated successfully');
       // Redirect to the recipe list page
       window.location.reload();
     } else {
@@ -197,7 +193,7 @@ function deleteRecipe() {
   })
   .then(response => {
     if (response.ok) {
-      console.log("Recipe deleted successfully");
+      alert("Recipe deleted successfully");
       window.location.reload();
     } else {
       console.error("Error deleting recipe");

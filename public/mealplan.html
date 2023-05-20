@@ -74,6 +74,23 @@
             // else {
                 
             // }
+        // LOGOUT
+        const logoutButton = document.getElementById('logoutButton');
+
+        logoutButton.addEventListener('click', async () => {
+            const response = await fetch('http://localhost:3001/users/logout', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                alert('Logout successful');
+                // Redirect to the login page or any other desired page
+                window.location.href = 'login.html';
+            } else {
+                const data = await response.json();
+                alert(data.error);
+            }
+        });
         
     });
 

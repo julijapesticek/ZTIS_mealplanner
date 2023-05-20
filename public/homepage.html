@@ -21,15 +21,17 @@
     <h1>Recipes</h1>
 
     <div id="recipeContainer"></div>
-
     <script>
+        document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
+        const isDarkMode = await window.darkMode.toggle();
+        })
+
+        // FETCH RECIPES
         async function fetchRecipes() {
-            try {
-                // FETCH RECIPES
+            try {                
                 const response = await fetch('http://localhost:3001/recipes/listRecipes');
                 const recipes = await response.json();
 
-                // RECIPE CARDS
                 recipes.forEach(recipe => {
                     const recipeCard = document.createElement('div');
                     recipeCard.classList.add('recipe-card');
@@ -106,25 +108,51 @@
             else {
                 fetchRecipes();
             }
-    });
-
-    // LOGOUT
-    const logoutButton = document.getElementById('logoutButton');
-
-    logoutButton.addEventListener('click', async () => {
-        const response = await fetch('http://localhost:3001/users/logout', {
-            method: 'POST',
         });
 
-        if (response.ok) {
-            alert('Logout successful');
-            // Redirect to the login page or any other desired page
-            window.location.href = 'login.html';
-        } else {
-            const data = await response.json();
-            alert(data.error);
-        }
-    });
+        // LOGOUT
+        const logoutButton = document.getElementById('logoutButton');
+
+        logoutButton.addEventListener('click', async () => {
+            const response = await fetch('http://localhost:3001/users/logout', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                alert('Logout successful');
+                // Redirect to the login page or any other desired page
+                window.location.href = 'login.html';
+            } else {
+                const data = await response.json();
+                alert(data.error);
+            }
+        });
+
+        // // DARK MODE
+        // const darkModeToggle = document.querySelector('.toggle-button button');
+
+        // function toggleDarkMode() {
+        //     const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        //     const isDarkModeEnabled = localStorage.getItem('darkMode') === 'true';
+
+        //     if (!isDarkModeEnabled && !prefersDarkMode) {
+        //         document.documentElement.setAttribute('data-theme', 'dark');
+        //         localStorage.setItem('darkMode', 'true');
+        //     } else {
+        //         document.documentElement.setAttribute('data-theme', 'light');
+        //         localStorage.setItem('darkMode', 'false');
+        //     }
+        // }
+
+        // // Check if dark mode is enabled in local storage or system settings
+        // const isDarkModeEnabled = localStorage.getItem('darkMode') === 'true';
+        // const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // if (isDarkModeEnabled || (!isDarkModeEnabled && prefersDarkMode)) {
+        //     document.documentElement.setAttribute('data-theme', 'dark');
+        // } else {
+        //     document.documentElement.setAttribute('data-theme', 'light');
+        // }
     </script>
 </body>
 
