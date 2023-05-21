@@ -1,75 +1,26 @@
-// Get all recipes from the server
+// GET ALL RECIPES
 const xhr = new XMLHttpRequest();
 
 xhr.open('GET', 'http://localhost:3001/recipes/listRecipes');
 xhr.onload = function() {
   if (xhr.status === 200) {
     const recipes = JSON.parse(xhr.responseText);
-    // Display the recipes on the frontend
      {
       // Display the data in the window
-      const ul = document.createElement('ul');
-      recipes.forEach(recipe => {
-        const li = document.createElement('li');
-        li.innerHTML = recipe.name;
-        ul.appendChild(li);
-      });
-      document.body.appendChild(ul);
+      console.log(recipes);
+      // const ul = document.createElement('ol');
+      // recipes.forEach(recipe => {
+      //   const li = document.createElement('li');
+      //   li.innerHTML = recipe.name;
+      //   ul.appendChild(li);
+      // });
+      // document.body.appendChild(ul);
     };
   } else {
     console.log('Request failed.  Returned status of ' + xhr.status);
   }
 };
 xhr.send();
-
-// Search for recipes by name
-
-// const searchInput = document.getElementById('searchInput');
-// const searchButton = document.getElementById('searchButton');
-// const recipeTableBody = document.getElementById('recipeTableBody');
-
-// searchButton.addEventListener('click', () => {
-//   const recipeName = searchInput.value.trim(); // Get the search query from the input field
-
-//   if (recipeName.length > 0) {
-//     // Send a GET request to the server to search for recipes with the given name
-//     fetch(`http://localhost:3001/recipeName/${recipeName}`, {
-//       method: 'GET',
-//       mode: 'cors',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       }
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//       // Clear the existing table rows
-//       recipeTableBody.innerHTML = '';
-
-//       if (data && data.length > 0) {
-//         // If filtered recipes are found, add them to the table
-//         data.forEach(recipe => {
-//           const row = recipeTableBody.insertRow();
-//           row.insertCell().textContent = recipe.id;
-//           row.insertCell().textContent = recipe.name;
-//           row.insertCell().textContent = recipe.ingredients.join(', ');
-//           row.insertCell().textContent = recipe.preparation;
-//           row.insertCell().textContent = recipe.calories;
-//           row.insertCell().textContent = recipe.protein;
-//           row.insertCell().textContent = recipe.fat;
-//           row.insertCell().textContent = recipe.carbs;
-//         });
-//       } else {
-//         // If no matching recipe is found, display an alert message
-//         alert('No matching recipes found');
-//       }
-//     })
-//     .catch(error => {
-//       console.error(`Error searching for recipe with name ${recipeName}:`, error);
-//     });
-//   } else {
-//     alert('Please enter a recipe name to search for');
-//   }
-// });
 
 
 const recipeForm = document.getElementById('recipeForm');
@@ -125,7 +76,7 @@ recipeForm.addEventListener('submit', event => {
   }
 });
 
-// PUT
+// POST RECIPE
 const addRecipe = (name, ingredients, preparation, calories, protein, fat, carbs) => {
   fetch('http://localhost:3001/recipes/addRecipe', {
     method: 'POST',

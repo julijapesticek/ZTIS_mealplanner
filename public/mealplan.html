@@ -11,17 +11,17 @@
 
     <div class="navbar">
         <ul>
+            <input type="image" src="img/moon-btn.png" id="toggle-dark-mode" width="20" height="20" margin-right="10px" class="gumb">
             <li><a href="homepage.html">Home</a></li>
             <li><a href="#">Meal Plan</a></li>
-            <Button id="toggle-dark-mode" class="gumb">Dark Mode</Button>
+            <button id="logoutButton" class="button">Logout</button>
         </ul>
     </div>
 
     <h1>Meal Planner</h1>
 
     <div>
-        <h2>Days of the Week</h2>
-        <div>
+        <div id="mealPlan">
             <div class="day">
                 <h3>Monday</h3>
                 <ul class="recipe-list" id="monday"></ul>
@@ -60,7 +60,9 @@
     </div>
 
     <script>
-
+        document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
+        const isDarkMode = await window.darkMode.toggle();
+        })
     
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = window.localStorage.getItem('accessToken');

@@ -8,18 +8,20 @@
 </head>
 
 <body>
-    <h1>Login</h1>
+    
+    <div id="login-register">
+        <form id="loginForm">
+            <h1>Login</h1>
+            <label for="email">Email:</label><br/>
+            <input type="email" id="email" name="email" required><br>
 
-    <form id="loginForm">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
+            <label for="password">Password:</label><br/>
+            <input type="password" id="password" name="password" required><br>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-
-        <input type="submit" value="Login">
-    </form>
-    <p> Don't have an account yet?<a href="register.html">Register here!</a></p>
+            <input type="submit" value="Login" class="button">
+            <p> Don't have an account yet?<a href="register.html"> Register here!</a></p>
+        </form>        
+    </div>
 
     <script>
         // LOGIN
@@ -51,7 +53,7 @@
                 window.localStorage.setItem('refreshToken', refreshToken);
 
                 if (data.message === 'Admin login successful') {
-                alert('Logout successful');
+                alert('Login successful');
                 window.location.href = 'admin.html';
                 } else {
                 alert('Logout successful');

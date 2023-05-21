@@ -1,34 +1,42 @@
 /* DARK MODE */
 @media (prefers-color-scheme: dark) {
-    body { background: #333; color: white; }
+    body { background-image: url("img/dark.jpg"); color: white; }
+    .navbar, .recipe-card, #adminForm, #mealPlan { background-color: #333 }
+    .navbar li a { color: white; }
+    #mealPlan { color: white; }
   }
   
 @media (prefers-color-scheme: light) {
-    body { background: #ddd; color: black; }
+    body { background-image: url("img/light.jpg"); color: #333; }
+    .navbar, .recipe-card, #adminForm, #mealPlan { background-color: #ffd3d3 }
+    .navbar li a { color: #333; }
+    #mealPlan { color: #333; }
   }
-
 
 /* NAVBAR */
 .navbar {
-  background-color: #f8f8f8;
   padding: 10px;
 }
 
 .navbar ul {
   list-style-type: none;
-  padding: 0;
-  margin: 0;
 }
 
 .navbar li {
-  display: inline;
+  display: inline-block;
   margin-right: 10px;
 }
 
 .navbar li a {
-  text-decoration: none;
-  color: #333;
+  text-decoration: underline;
   font-weight: bold;
+}
+
+.gumb {
+  width: 20px;
+  height: 20px;
+  padding-right: 20px;
+  margin-right: 20px;
 }
 
 /* HOMEPAGE */
@@ -39,6 +47,7 @@
   margin: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  vertical-align: top;
 }
 
 .dropdown {
@@ -64,4 +73,131 @@
 
 .dropdown:hover .dropdown-content {
   display: block;
+}
+
+/* ADMIN PAGE */
+.recipeForm {
+  margin-left: 20px;
+  padding: 50px;
+}
+
+/* INPUT FIELDS */
+label {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+input[type=text] {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+input[type=email] {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+input[type=password] {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+input[type=number] {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+textarea {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+/* SEARCH */
+#searchInput {
+  width: 100px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+.search-container {
+  position: relative;
+  float: right;
+}
+
+/* BUTTONS */
+.button, .dropbtn {
+  background-color: white; 
+  color: #333; 
+  border: 2px solid #333;
+  padding: 12px 20px;
+  transition-duration: 0.4s;
+}
+
+.button:hover {
+  background-color: #333;
+  color: white;
+}
+
+#logoutButton {
+  position: relative;
+  margin-bottom: 25px;
+  float: right;
+}
+
+/* LOGIN AND REGISTER */
+#login-register {
+  background-color: white;
+  border-radius: 5px;
+  margin: 0 auto;
+  width: 35%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#loginForm {
+  text-align: center;
+}
+
+#registerForm {
+  text-align: center;
+}
+
+p a {
+  color: #df7598;
+}
+
+select {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+/* ADMIN PAGE */
+#adminForm {
+  display: inline-block;
+  border-radius: 5px;
+  width: auto;
+  padding: 20px;
+}
+
+/* MEAL PLAN TABLE */
+#mealPlan {
+  display: inline-block;
+  border-radius: 5px;
+  margin: 0 auto;
+  width: auto;
+  padding: 20px;
 }
