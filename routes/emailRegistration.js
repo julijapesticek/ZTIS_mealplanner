@@ -34,6 +34,8 @@ async function sendEmail(user) {
     });
   
     console.log('Message sent: %s', info.messageId);
+
+    return "Mail sent"
   };
 
   module.exports.sendEmail = sendEmail;

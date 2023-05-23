@@ -60,8 +60,9 @@ router.route('/addUser').post(async (req, res) => {
             httpOnly: true,
         });
 
-        //LARA TO POPRAVIIIIII
-        //emailRoutes.sendEmail(user);
+        
+        var email = emailRoutes.sendEmail(user);
+        console.log(email);
 
         let userUri =
             `${req.protocol}://${req.headers.host}${req.originalUrl}/${user._id}`;
