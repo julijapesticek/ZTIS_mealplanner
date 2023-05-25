@@ -1,4 +1,5 @@
 const Recipe = require('../models/recipes');
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const { recipeSchema } = require('../helpers/validation_schema');
@@ -14,7 +15,25 @@ router.route('/listRecipes').get(async (req, res) => {
     }
 });
 
-// FIND ONE RECIPE
+
+// FIND ONE RECIPE BY NAME
+router.route('/findRecipe/:name').get(async (req, res) => {
+    try {
+        const recipe = await Recipe.findOne({ name: req.params.name });
+
+        if (recipe) {
+            res.json(recipe);
+        } else {
+            res.status(404).json({ msg: 'Recipe not found' });
+        }
+    } catch (err) {
+        res.status(500).send({ msg: err });
+    }
+});
+
+
+
+// FIND ONE RECIPE BY ID
 router.route('/recipe/:id').get(async (req, res) => {
     const najdirecipe = await Recipe.findOne({
         _id: req.params.id
@@ -25,6 +44,8 @@ router.route('/recipe/:id').get(async (req, res) => {
         res.status(404).json({ msg: `Recipe z id=${req.params.id} ni bil najden` });
     }
 });
+
+
 
 // ADD RECIPE
 router.route('/addRecipe').post(verifyAccessToken, async (req, res) => {
