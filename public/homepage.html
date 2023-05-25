@@ -28,11 +28,14 @@
         <button id="searchButton" class="button">Search</button>
     </div>
 
+    
+
     <div id="recipeContainer"></div>
     <script>
         document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
         const isDarkMode = await window.darkMode.toggle();
         })
+
 
         // FETCH RECIPES
         async function fetchRecipes() {
@@ -103,6 +106,90 @@
             }
         }
 
+        // RENDER RECIPES
+        function renderRecipes(recipes) {
+        const recipeContainer = document.getElementById('recipeContainer');
+        recipeContainer.innerHTML = '';
+
+        if (recipes.length === 0) {
+            const noResults = document.createElement('p');
+            noResults.textContent = 'No recipes found.';
+            recipeContainer.appendChild(noResults);
+        } else {
+            recipes.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.classList.add('recipe-card');
+
+                const name = document.createElement('h3');
+                name.textContent = recipe.name;
+                recipeCard.appendChild(name);
+
+                const ingredients = document.createElement('p');
+                ingredients.textContent = `Ingredients: ${recipe.ingredients.join(', ')}`;
+                recipeCard.appendChild(ingredients);
+
+                const preparation = document.createElement('p');
+                preparation.textContent = `Preparation: ${recipe.preparation.join(', ')}`;
+                recipeCard.appendChild(preparation);
+
+                const calories = document.createElement('p');
+                calories.textContent = `Calories: ${recipe.calories}`;
+                recipeCard.appendChild(calories);
+
+                const protein = document.createElement('p');
+                protein.textContent = `Protein: ${recipe.protein}`;
+                recipeCard.appendChild(protein);
+
+                const fat = document.createElement('p');
+                fat.textContent = `Fat: ${recipe.fat}`;
+                recipeCard.appendChild(fat);
+
+                const carbs = document.createElement('p');
+                carbs.textContent = `Carbs: ${recipe.carbs}`;
+                recipeCard.appendChild(carbs);
+
+                // ADD TO DAY DROPDOWN
+                const dropdown = document.createElement('div');
+                    dropdown.classList.add('dropdown');
+                    recipeCard.appendChild(dropdown);
+
+                    const dropdownButton = document.createElement('button');
+                    dropdownButton.textContent = 'Add to Day';
+                    dropdownButton.classList.add('dropbtn');
+                    dropdown.appendChild(dropdownButton);
+
+                    const dropdownContent = document.createElement('div');
+                    dropdownContent.classList.add('dropdown-content');
+                    dropdown.appendChild(dropdownContent);
+
+                    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                    daysOfWeek.forEach(day => {
+                        const dayLink = document.createElement('a');
+                        dayLink.textContent = day;
+                        dayLink.href = `mealplan.html?recipe=${recipe.name}&day=${day}`;
+                        dropdownContent.appendChild(dayLink);
+                    });
+
+                    recipeContainer.appendChild(recipeCard);
+
+                recipeContainer.appendChild(recipeCard);
+            });
+        }
+        }
+
+        // SEARCH RECIPES
+        async function searchRecipes(query) {
+        try {
+            const response = await fetch(`http://localhost:3001/recipes/findRecipe/${encodeURIComponent(query)}`);
+            const recipe = await response.json();
+            console.log(recipe);
+            renderRecipes(recipe ? [recipe] : []);
+        } catch (error) {
+            console.log(error);
+        }
+        }
+
         // TOKENS
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = window.localStorage.getItem('accessToken');
@@ -116,6 +203,17 @@
             else {
                 fetchRecipes();
             }
+        });
+
+        // Add an event listener to the search button
+        document.getElementById('searchButton').addEventListener('click', async () => {
+        const query = document.getElementById('searchInput').value.trim(); // Get the search query and remove leading/trailing spaces
+
+        if (query !== '') {
+            await searchRecipes(query);
+        } else {
+            await fetchRecipes();
+        }
         });
 
         // LOGOUT
