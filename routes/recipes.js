@@ -31,6 +31,21 @@ router.route('/findRecipe/:name').get(async (req, res) => {
     }
 });
 
+// FIND RECIPES BY DAY OF THE WEEK
+router.route('/getDailyRecipe/:dayOfTheWeek').get(async (req, res) => {
+    try {        
+        const recipes = await Recipe.find({ dayOfTheWeek: req.params.dayOfTheWeek });
+        if (recipes.length > 0) {
+            res.json(recipes);
+        } else {
+            res.status(404).json({ msg: 'Recipes not found for the specified day' });
+        }
+    } catch (err) {
+        res.status(500).json({ msg: err });
+    }
+});
+
+
 
 
 // FIND ONE RECIPE BY ID
@@ -63,29 +78,45 @@ router.route('/addRecipe').post(verifyAccessToken, async (req, res) => {
 });
 
 // PUT RECIPE
-router.route('/updateRecipe/:id').put(verifyAccessToken, async (req, res) => {
-    if (req.params.id !== req.body._id) {
-        res.status(400).json('IDja nista enaka!')
-    } else {
-        try {
-            const najdirecipe = await Recipe.findOne({
-                _id:
-                    req.params.id
-            });
-            if (najdirecipe) {
-                await Recipe.findByIdAndUpdate(req.params.id,
-                    req.body);
-                res.status(201).json({ msg: 'Recipe je bil posodobljen' });
-            } else {
-                res.status(404).json({
-                    msg: `Recipe z id=${req.params.id} ni bil najden`
-                });
-            }
-        } catch (err) {
-            res.status(500).send(err)
+router.route('/updateRecipe/:id').put(async (req, res) => {
+    try {
+        const updatedRecipe = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        console.log(req.body)
+        console.log(updatedRecipe)
+        if (updatedRecipe) {
+          res.status(200).json({ msg: 'Recipe je bil posodobljen', recipe: updatedRecipe });
+        } else {
+          res.status(404).json({ msg: `Recipe z id=${req.params.id} ni bil najden` });
         }
-    }
+      } catch (err) {
+        res.status(500).send(err);
+      }
+
+    // if (req.params.id !== req.body._id) {
+    //     res.status(400).json('IDja nista enaka!')
+    // } else {
+        
+    //     try {
+    //         const najdirecipe = await Recipe.findOne({
+    //             _id:
+    //                 req.params.id
+    //         });
+    //         if (najdirecipe) {
+    //             await Recipe.findByIdAndUpdate(req.params.id,
+    //                 req.body);
+    //             res.status(201).json({ msg: 'Recipe je bil posodobljen' });
+    //         } else {
+    //             res.status(404).json({
+    //                 msg: `Recipe z id=${req.params.id} ni bil najden`
+    //             });
+    //         }
+    //     } catch (err) {
+    //         res.status(500).send(err)
+    //     }
+    // }
 });
+
+
 
 // DELETE RECIPE
 router.route('/deleteRecipe/:id').delete(verifyAccessToken, async (req, res) => {

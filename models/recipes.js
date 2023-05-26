@@ -34,6 +34,12 @@ const recipeSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  dayOfTheWeek: {
+    type: String,
+    required: false,
+  },
+  
+  
 });
 
 const Recipe = mongoose.model('recipe', recipeSchema, 'Recipes');
