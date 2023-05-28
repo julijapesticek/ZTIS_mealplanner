@@ -71,7 +71,7 @@ router.route('/recipe/:id').get(async (req, res) => {
 
 
 // ADD RECIPE
-router.route('/addRecipe').post(verifyAccessToken, async (req, res) => {
+router.route('/addRecipe').post( async (req, res) => {
     try {
         const result = await recipeSchema.validateAsync(req.body);
         const recipe = new Recipe(result);
@@ -82,6 +82,7 @@ router.route('/addRecipe').post(verifyAccessToken, async (req, res) => {
     } catch (err) {
         if (err.isJoi === true) err.status = 422;
         res.status(500).send(err);
+        console.log(err);
     }
 });
 
