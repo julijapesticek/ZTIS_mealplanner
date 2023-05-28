@@ -12,8 +12,8 @@
     <div class="navbar">
         <ul>
             <input type="image" src="img/moon-btn.png" id="toggle-dark-mode" width="20" height="20" margin-right="10px" class="gumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="mealplan.html">Meal Plan</a></li>
+            <li><a href="#" id="homeLink">Home</a></li>
+            <li><a href="mealplan.html" id="mealPlannerLink">Meal Plan</a></li>
             <button id="logoutButton" class="button">Logout</button>
         </ul>
     </div>
@@ -35,7 +35,7 @@
         document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
         const isDarkMode = await window.darkMode.toggle();
         })
-
+        let idUser;
 
         // FETCH RECIPES
         async function fetchRecipes() {
@@ -98,7 +98,12 @@
                         dropdownContent.appendChild(dayLink);
 
                         // Event handler for day selection
-                        dayLink.addEventListener('click', createDaySelectionHandler(recipe, day));
+                        //dayLink.addEventListener('click', createDaySelectionHandler(recipe, day))
+                        
+                        dayLink.addEventListener('click', () => {
+                            console.log('Day button clicked');
+                            createDaySelectionHandlerForMealPlanner(recipe, day, idUser)();
+                        });
                     });
 
                     document.getElementById('recipeContainer').appendChild(recipeCard);
@@ -138,6 +143,42 @@
                 }
             };
         }
+
+        //post mealplanner
+        function createDaySelectionHandlerForMealPlanner(recipe, day, idUser) {
+            return async () => {
+                try {
+                    // Prepare the payload for the POST request
+                    const payload = {
+                        dayOfTheWeek: day,
+                        idRecipe: recipe._id,
+                        idUser: idUser
+                    };
+                    console.log(payload);
+
+                    const postResponse = await fetch(`http://localhost:3001/recipes/addMealplan`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (postResponse.ok) {
+                        console.log(`Recipe "${recipe.name}" added to ${day}`);
+
+                        window.location.href = `mealplan.html?recipe=${recipe.name}&day=${day}&idUser=${idUser}`;
+                    } else {
+                        console.log('Failed to add recipe to day:', postResponse.status);
+                    }
+                } catch (error) {
+                    console.log('Error adding recipe to day:', error);
+                }
+            };
+        }
+
+
+       
 
         // RENDER RECIPES
         function renderRecipes(recipes) {
@@ -225,8 +266,17 @@
 
         // TOKENS
         document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            idUser = urlParams.get('idUser');
             const accessToken = window.localStorage.getItem('accessToken');
             const refreshToken = window.localStorage.getItem('refreshToken');
+            const idUser1 = window.localStorage.getItem('idUser');
+
+            const homeLink = document.getElementById('homeLink');
+            homeLink.href = `homepage.html?idUser=${idUser1}`;
+
+            const mealPlannerLink = document.getElementById('mealPlannerLink');
+            mealPlannerLink.href = `mealplan.html?idUser=${idUser1}`;
 
             console.log(accessToken, refreshToken);
 

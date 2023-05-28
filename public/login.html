@@ -47,17 +47,19 @@
             if (response.ok) {
                 const accessToken = data['AccessToken:'];
                 const refreshToken = data['RefreshToken:'];
-                console.log(accessToken, refreshToken);
+                const idUser = data['idUser'];
+                console.log(accessToken, refreshToken, idUser);
 
                 window.localStorage.setItem('accessToken', accessToken);
                 window.localStorage.setItem('refreshToken', refreshToken);
+                window.localStorage.setItem('idUser', idUser);
 
                 if (data.message === 'Admin login successful') {
                 alert('Login successful');
-                window.location.href = 'admin.html';
+                window.location.href = `admin.html?idUser=${idUser}`;
                 } else {
                 alert('Logout successful');
-                window.location.href = 'homepage.html';
+                window.location.href = `homepage.html?idUser=${idUser}`;
                 }
             } else {
                 alert(data.error);

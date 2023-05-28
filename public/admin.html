@@ -12,8 +12,8 @@
     <div class="navbar">
       <ul>
           <input type="image" src="img/moon-btn.png" id="toggle-dark-mode" class="gumb">
-          <li><a href="homepage.html">Home</a></li>
-          <li><a href="mealplan.html">Meal Plan</a></li>          
+          <li><a href="homepage.html" id="homeLink">Home</a></li>
+          <li><a href="mealplan.html" id="mealPlannerLink">Meal Plan</a></li>          
           <button id="logoutButton" class="button">Logout</button>
       </ul>
   </div>
@@ -96,6 +96,12 @@
       document.addEventListener('DOMContentLoaded', () => {
             const accessToken = window.localStorage.getItem('accessToken');
             const refreshToken = window.localStorage.getItem('refreshToken');
+            const idUser = window.localStorage.getItem('idUser');
+            const homeLink = document.getElementById('homeLink');
+            homeLink.href = `homepage.html?idUser=${idUser}`;
+
+            const mealPlannerLink = document.getElementById('mealPlannerLink');
+            mealPlannerLink.href = `mealplan.html?idUser=${idUser}`;
 
             console.log(accessToken, refreshToken);
 
