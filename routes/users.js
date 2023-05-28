@@ -97,9 +97,10 @@ router.route('/login').post(async (req, res) => {
         });
 
         if (user.type === 'admin') {
-            res.json({ message: 'Admin login successful', 'AccessToken:': accessToken, 'RefreshToken:': refreshToken });
+            res.json({ message: 'Admin login successful', 'AccessToken:': accessToken, 'RefreshToken:': refreshToken, 'idUser': user.id });
+            console.log(user.id)
         } else {
-        res.json({ message: 'User login successful', 'AccessToken:': accessToken, 'RefreshToken:': refreshToken });
+        res.json({ message: 'User login successful', 'AccessToken:': accessToken, 'RefreshToken:': refreshToken, 'idUser': user.id });
         }
     } catch (err) {
         if (err.isJoi === true) err.status = 422;

@@ -25,8 +25,15 @@ const recipeSchema = Joi.object({
     carbs: Joi.number().required(),
 });
 
+const mealPlannerSchema = Joi.object({
+    dayOfTheWeek: Joi.string().min(1).required(),
+    idRecipe: Joi.string().min(1).required(),
+    idUser: Joi.string().min(1).required(),
+});
+
 module.exports = {
     userSchema,
     loginSchema,
-    recipeSchema
+    recipeSchema,
+    mealPlannerSchema
 }
