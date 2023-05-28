@@ -102,7 +102,7 @@ const addRecipe = (name, ingredients, preparation, calories, protein, fat, carbs
       throw new Error('Failed to add recipe');
     }
   })
-  .catch(error => console.error(error));
+  .catch(err => console.error(err));
 };
 
 // UPDATE RECIPE
