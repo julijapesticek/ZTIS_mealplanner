@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    
+    <title>Meal planner</title>
+  </head>
+
+    <div class="navbar">
+      <ul>
+          <input type="image" src="img/moon-btn.png" id="toggle-dark-mode" class="gumb">
+          <li><a href="homepage.html" id="homeLink">Home</a></li>
+          <li><a href="mealplan.html" id="mealPlannerLink">Meal Plan</a></li>          
+          <button id="logoutButton" class="button">Logout</button>
+      </ul>
+  </div>
+
+  <body>
+    <h1 class ="header">Admin page</h1>
+    <div id="adminForm">
+      <form id="recipeForm">
+
+        <div class="form-group row">
+          <label for="recipeId">Recipe Id:</label><br/>
+          <input type="text" id="recipeId">
+        </div>
+
+        <div class="form-group row">
+          <label for="recipeName">Recipe Name:</label><br/>
+          <input type="text" id="recipeName">
+        </div>
+
+        <div class="form-group row">
+          <label for="ingredients">Ingredients:</label><br/>
+          <textarea id="ingredients"></textarea>
+        </div>
+
+        <div class="form-group row">
+          <label for="preparation">Preparation:</label><br/>
+          <textarea id="preparation"></textarea>
+        </div>
+
+        <div class="form-group row">
+          <label for="calories">Calories:</label><br/>
+          <input type="text" id="calories">
+        </div>
+
+        <div class="form-group row">
+          <label for="protein">Protein:</label><br/>
+          <input type="text" id="protein">
+        </div>
+
+        <div class="form-group row">
+          <label for="fat">Fat:</label><br/>
+          <input type="text" id="fat">
+        </div>
+
+        <div class="form-group row">
+          <label for="carbs">Carbs:</label><br/>
+          <input type="text" id="carbs">
+        </div>
+
+        <button id="submitButton" type="submit" class="button">Submit</button>
+        <button id="cancelButton" class="button">Cancel</button>
+        <button id="deleteButton" class="button">Delete recipe</button>
+
+      </form>
+    </div>
+    <!-- <table id="recipeTable">
+      <!-- <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Ingredients</th>
+          <th>Preparation</th>
+          <th>Calories</th>
+          <th>Protein</th>
+          <th>Fat</th>
+          <th>Carbs</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="recipeTableBody"></tbody>
+    </table>     -->
+
+    <script src="admin.js"></script>
+    <script>
+      document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
+      const isDarkMode = await window.darkMode.toggle();
+      })
+
+      // TOKENS
+      document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = window.localStorage.getItem('accessToken');
+            const refreshToken = window.localStorage.getItem('refreshToken');
+            const idUser = window.localStorage.getItem('idUser');
+            const homeLink = document.getElementById('homeLink');
+            homeLink.href = `homepage.html?idUser=${idUser}`;
+
+            const mealPlannerLink = document.getElementById('mealPlannerLink');
+            mealPlannerLink.href = `mealplan.html?idUser=${idUser}`;
+
+            console.log(accessToken, refreshToken);
+
+            if (!accessToken || !refreshToken) {
+                window.location.href = 'login.html';
+            }
+            // else {
+            //     fetchRecipes();
+            // }
+        });
+
+        // LOGOUT
+        const logoutButton = document.getElementById('logoutButton');
+
+        logoutButton.addEventListener('click', async () => {
+            const response = await fetch('http://localhost:3001/users/logout', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                alert('Logout successful');
+                // Redirect to the login page or any other desired page
+                window.location.href = 'login.html';
+            } else {
+                const data = await response.json();
+                alert(data.error);
+            }
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <title>Meal Planner</title>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <ul>
+            <input type="image" src="img/moon-btn.png" id="toggle-dark-mode" width="20" height="20" margin-right="10px" class="gumb">
+            <li><a href="homepage.html" id="homeLink">Home</a></li>
+            <li><a href="#" id="mealPlannerLink">Meal Plan</a></li>
+            <button id="logoutButton" class="button">Logout</button>
+        </ul>
+    </div>
+
+    <h1>Meal Planner</h1>
+
+    <div>
+        <div id="mealPlan">
+            <div class="day" id="mondayDay">
+                <h3>Monday</h3>
+                <ul class="recipe-list" id="monday"></ul>
+            </div>
+
+            <div class="day" id="tuesdayDay">
+                <h3>Tuesday</h3>
+                <ul class="recipe-list" id="tuesday"></ul>
+            </div>
+
+            <div class="day" id="wednesdayDay">
+                <h3>Wednesday</h3>
+                <ul class="recipe-list" id="wednesday"></ul>
+            </div>
+
+            <div class="day" id="thursdayDay">
+                <h3>Thursday</h3>
+                <ul class="recipe-list" id="thursday"></ul>
+            </div>
+
+            <div class="day" id="fridayDay">
+                <h3>Friday</h3>
+                <ul class="recipe-list" id="friday"></ul>
+            </div>
+
+            <div class="day" id="saturdayDay">
+                <h3>Saturday</h3>
+                <ul class="recipe-list" id="saturday"></ul>
+            </div>
+
+            <div class="day" id="sundayDay">
+                <h3>Sunday</h3>
+                <ul class="recipe-list" id="sunday"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
+            const isDarkMode = await window.darkMode.toggle();
+        })
+        let idUser;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            idUser = urlParams.get('idUser');
+            const selectedDay = urlParams.get('day');
+            const accessToken = window.localStorage.getItem('accessToken');
+            const refreshToken = window.localStorage.getItem('refreshToken');
+            const idUser1 = window.localStorage.getItem('idUser');
+
+            const homeLink = document.getElementById('homeLink');
+            homeLink.href = `homepage.html?idUser=${idUser1}`;
+
+            const mealPlannerLink = document.getElementById('mealPlannerLink');
+            mealPlannerLink.href = `mealplan.html?idUser=${idUser1}`;
+
+            console.log(accessToken, refreshToken);
+
+            if (!accessToken || !refreshToken) {
+                window.location.href = 'login.html';
+            } else {
+                // Get the selected day from the query parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const selectedDay = urlParams.get('day');
+
+                const allDayDivs = document.querySelectorAll('.day');
+                const dayButtonsContainer = document.getElementById('mealPlan');
+
+                if (!selectedDay) {
+                    // No day is selected, show buttons for each day
+                    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                    daysOfWeek.forEach(dayOfWeek => {
+                        const dayButton = document.createElement('button');
+                        dayButton.textContent = dayOfWeek;
+                        dayButton.classList.add('day-button');
+                        dayButton.addEventListener('click', () => {
+                            handleDaySelection(dayOfWeek.toLowerCase());
+                            fetchRecipes(dayOfWeek.toLowerCase(), idUser);
+
+                            // Hide all day divs
+                            allDayDivs.forEach(dayDiv => {
+                                dayDiv.style.display = 'none';
+                            });
+
+                            // Show the selected day div
+                            const selectedDayDiv = document.getElementById(`${dayOfWeek.toLowerCase()}Day`);
+                            if (selectedDayDiv) {
+                                selectedDayDiv.style.display = 'block';
+                            }
+                        });
+                        dayButtonsContainer.appendChild(dayButton);
+                    });
+
+                    // Hide all day divs
+                    allDayDivs.forEach(dayDiv => {
+                        dayDiv.style.display = 'none';
+                    });
+                } else {
+                    // A day is selected
+                    // Show the selected day div
+                    const selectedDayDiv = document.getElementById(`${selectedDay.toLowerCase()}Day`);
+                    if (selectedDayDiv) {
+                        selectedDayDiv.style.display = 'block';
+                        selectedDayDiv.querySelector('h3').textContent = selectedDay;
+
+                        // Hide other day divs
+                        allDayDivs.forEach(dayDiv => {
+                            if (dayDiv !== selectedDayDiv) {
+                                dayDiv.style.display = 'none';
+                            }
+                        });
+
+                        fetchRecipes(selectedDay, idUser);
+                    }
+                }
+            }
+        });
+
+        function handleDaySelection(day) {
+            // Redirect to the same page with the selected day as a query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+
+            const dayString = day.charAt(0).toUpperCase() + day.slice(1);
+
+            urlParams.set('day', dayString);
+            const newUrl = `${window.location.origin}${window.location.pathname}?${urlParams.toString()}`;
+            window.location.href = newUrl;
+        }
+
+        // FETCH RECIPES
+        async function fetchRecipes(day, idUser) {
+            try {
+                //const response = await fetch(`http://localhost:3001/recipes/getDailyRecipe/${day}`);
+                const response = await fetch(`http://localhost:3001/recipes/findMealplan/${idUser}/${day}`);
+                const recipes = await response.json();
+
+                for (const recipe of recipes) {
+                    // Fetch the recipe details from the /recipes/recipe/{idRecipe} endpoint
+                    const recipeResponse = await fetch(`http://localhost:3001/recipes/recipe/${recipe.idRecipe}`);
+                    const recipeData = await recipeResponse.json();
+
+                    const recipeCard = document.createElement('div');
+                    recipeCard.classList.add('recipe-card');
+
+                    const name = document.createElement('h3');
+                    name.textContent = recipeData.name; // Use recipeData instead of recipe
+                    recipeCard.appendChild(name);
+
+                    const ingredients = document.createElement('p');
+                    ingredients.textContent = `Ingredients: ${recipeData.ingredients.join(', ')}`; // Use recipeData instead of recipe
+                    recipeCard.appendChild(ingredients);
+
+                    const preparation = document.createElement('p');
+                    preparation.textContent = `Preparation: ${recipeData.preparation.join(', ')}`; // Use recipeData instead of recipe
+                    recipeCard.appendChild(preparation);
+
+                    const calories = document.createElement('p');
+                    calories.textContent = `Calories: ${recipeData.calories}`; // Use recipeData instead of recipe
+                    recipeCard.appendChild(calories);
+
+                    const protein = document.createElement('p');
+                    protein.textContent = `Protein: ${recipeData.protein}`; // Use recipeData instead of recipe
+                    recipeCard.appendChild(protein);
+
+                    const fat = document.createElement('p');
+                    fat.textContent = `Fat: ${recipeData.fat}`; // Use recipeData instead of recipe
+                    recipeCard.appendChild(fat);
+
+                    const carbs = document.createElement('p');
+                    carbs.textContent = `Carbs: ${recipeData.carbs}`; // Use recipeData instead of recipe
+                    recipeCard.appendChild(carbs);
+
+                    // ADD DELETE BUTTON
+                    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.classList.add('delete-button');
+    recipeCard.appendChild(deleteButton);
+
+    // Event handler for recipe deletion
+    deleteButton.addEventListener('click', function() {
+  console.log('Delete button clicked');
+  deleteRecipe(recipeData, day, idUser);
+});
+
+
+                    document.getElementById(day.toLowerCase()).appendChild(recipeCard);
+
+                    // Display the recipe details
+                    const recipeDetails = document.createElement('div');
+                    recipeDetails.classList.add('recipe-details');
+
+                    // const recipeName = document.createElement('h4');
+                    // recipeName.textContent = 'Recipe Details';
+                    // recipeDetails.appendChild(recipeName);
+
+                    // const recipeIngredients = document.createElement('p');
+                    // recipeIngredients.textContent = `Ingredients: ${recipeData.ingredients.join(', ')}`;
+                    // recipeDetails.appendChild(recipeIngredients);
+
+                    // const recipeInstructions = document.createElement('p');
+                    // recipeInstructions.textContent = `Instructions: ${recipeData.instructions}`;
+                    // recipeDetails.appendChild(recipeInstructions);
+
+                    recipeCard.appendChild(recipeDetails);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        // DELETE RECIPE
+async function deleteRecipe(recipeData, day, idUser) {
+    console.log('Funckija');
+    console.log(recipeData);
+    console.log(day);
+    console.log(idUser);
+
+    try {
+    // Prepare the payload for the DELETE request
+    const payload = {
+      idUser: idUser,
+      idRecipe: recipeData._id,
+      dayOfTheWeek: day
+    };
+
+    const deleteResponse = await fetch(`http://localhost:3001/recipes/deleteMealplan/${idUser}/${recipeData._id}/${day}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (deleteResponse.ok) {
+      console.log(`Recipe "${recipeData.name}" deleted from ${day}`);
+      window.location.href = `mealplan.html?idUser=${idUser}&day=${day}`;
+      // Optionally perform additional actions after successful deletion
+    } else {
+      console.log('Failed to delete recipe from day:', deleteResponse.status);
+    }
+  } catch (error) {
+    console.log('Error deleting recipe from day:', error);
+  }
+}
+
+        // ADD RECIPE TO DAY
+        // async function addRecipeToDay(recipe, day) {
+        //     try {
+        //         const response = await fetch('http://localhost:3001/mealplan/addRecipe', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify({ recipe, day })
+        //         });
+
+        //         if (response.ok) {
+        //             alert('Recipe added to the meal plan successfully.');
+        //         } else {
+        //             const data = await response.json();
+        //             alert(data.error);
+        //         }
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+        // }
+
+        // LOGOUT
+        const logoutButton = document.getElementById('logoutButton');
+
+        logoutButton.addEventListener('click', async () => {
+            const response = await fetch('http://localhost:3001/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ idUser })
+            });
+
+            if (response.ok) {
+                window.localStorage.removeItem('accessToken');
+                window.localStorage.removeItem('refreshToken');
+                window.localStorage.removeItem('idUser');
+                window.location.href = 'login.html';
+            } else {
+                console.log('Logout failed');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

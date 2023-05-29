@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <title>Recipes</title>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <ul>
+            <input type="image" src="img/moon-btn.png" id="toggle-dark-mode" width="20" height="20" margin-right="10px" class="gumb">
+            <li><a href="#" id="homeLink">Home</a></li>
+            <li><a href="mealplan.html" id="mealPlannerLink">Meal Plan</a></li>
+            <button id="logoutButton" class="button">Logout</button>
+        </ul>
+    </div>
+
+    <h1>Recipes</h1>
+    <hr>
+
+    <!-- SEARCH -->
+    <div class="search-container">
+        <label for="searchInput">Search:</label>
+        <input type="text" id="searchInput">
+        <button id="searchButton" class="button">Search</button>
+    </div>
+
+    
+
+    <div id="recipeContainer"></div>
+    <script>
+        document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
+        const isDarkMode = await window.darkMode.toggle();
+        })
+        let idUser;
+
+        // FETCH RECIPES
+        async function fetchRecipes() {
+            try {
+                const response = await fetch('http://localhost:3001/recipes/listRecipes');
+                const recipes = await response.json();
+
+                recipes.forEach(recipe => {
+                    const recipeCard = document.createElement('div');
+                    recipeCard.classList.add('recipe-card');
+
+                    const name = document.createElement('h3');
+                    name.textContent = recipe.name;
+                    recipeCard.appendChild(name);
+
+                    const ingredients = document.createElement('p');
+                    ingredients.textContent = `Ingredients: ${recipe.ingredients.join(', ')}`;
+                    recipeCard.appendChild(ingredients);
+
+                    const preparation = document.createElement('p');
+                    preparation.textContent = `Preparation: ${recipe.preparation.join(', ')}`;
+                    recipeCard.appendChild(preparation);
+
+                    const calories = document.createElement('p');
+                    calories.textContent = `Calories: ${recipe.calories}`;
+                    recipeCard.appendChild(calories);
+
+                    const protein = document.createElement('p');
+                    protein.textContent = `Protein: ${recipe.protein}`;
+                    recipeCard.appendChild(protein);
+
+                    const fat = document.createElement('p');
+                    fat.textContent = `Fat: ${recipe.fat}`;
+                    recipeCard.appendChild(fat);
+
+                    const carbs = document.createElement('p');
+                    carbs.textContent = `Carbs: ${recipe.carbs}`;
+                    recipeCard.appendChild(carbs);
+
+                    // ADD TO DAY DROPDOWN
+                    const dropdown = document.createElement('div');
+                    dropdown.classList.add('dropdown');
+                    recipeCard.appendChild(dropdown);
+
+                    const dropdownButton = document.createElement('button');
+                    dropdownButton.textContent = 'Add to Day';
+                    dropdownButton.classList.add('dropbtn');
+                    dropdown.appendChild(dropdownButton);
+
+                    const dropdownContent = document.createElement('div');
+                    dropdownContent.classList.add('dropdown-content');
+                    dropdown.appendChild(dropdownContent);
+
+                    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                    daysOfWeek.forEach(day => {
+                        const dayLink = document.createElement('button');
+                        dayLink.textContent = day;
+                        dayLink.classList.add('day-button');
+                        dropdownContent.appendChild(dayLink);
+
+                        // Event handler for day selection
+                        //dayLink.addEventListener('click', createDaySelectionHandler(recipe, day))
+                        
+                        dayLink.addEventListener('click', () => {
+                            console.log('Day button clicked');
+                            createDaySelectionHandlerForMealPlanner(recipe, day, idUser)();
+                        });
+                    });
+
+                    document.getElementById('recipeContainer').appendChild(recipeCard);
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        function createDaySelectionHandler(recipe, day) {
+            return async () => {
+                try {
+                    // Prepare the payload for the PUT request
+                    const payload = {
+                        ...recipe,
+                        dayOfTheWeek: day
+                    };
+                    console.log(payload);
+
+                    const putResponse = await fetch(`http://localhost:3001/recipes/updateRecipe/${recipe._id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (putResponse.ok) {
+                        console.log(`Recipe "${recipe.name}" added to ${day}`);
+
+                        window.location.href = `mealplan.html?recipe=${recipe.name}&day=${day}`;
+                    } else {
+                        console.log('Failed to add recipe to day:', putResponse.status);
+                    }
+                } catch (error) {
+                    console.log('Error adding recipe to day:', error);
+                }
+            };
+        }
+
+        //post mealplanner
+        function createDaySelectionHandlerForMealPlanner(recipe, day, idUser) {
+            return async () => {
+                try {
+                    // Prepare the payload for the POST request
+                    const payload = {
+                        dayOfTheWeek: day,
+                        idRecipe: recipe._id,
+                        idUser: idUser
+                    };
+                    console.log(payload);
+
+                    const postResponse = await fetch(`http://localhost:3001/recipes/addMealplan`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (postResponse.ok) {
+                        console.log(`Recipe "${recipe.name}" added to ${day}`);
+
+                        window.location.href = `mealplan.html?recipe=${recipe.name}&day=${day}&idUser=${idUser}`;
+                    } else {
+                        console.log('Failed to add recipe to day:', postResponse.status);
+                    }
+                } catch (error) {
+                    console.log('Error adding recipe to day:', error);
+                }
+            };
+        }
+
+
+       
+
+        // RENDER RECIPES
+        function renderRecipes(recipes) {
+        const recipeContainer = document.getElementById('recipeContainer');
+        recipeContainer.innerHTML = '';
+
+        if (recipes.length === 0) {
+            const noResults = document.createElement('p');
+            noResults.textContent = 'No recipes found.';
+            recipeContainer.appendChild(noResults);
+        } else {
+            recipes.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.classList.add('recipe-card');
+
+                const name = document.createElement('h3');
+                name.textContent = recipe.name;
+                recipeCard.appendChild(name);
+
+                const ingredients = document.createElement('p');
+                ingredients.textContent = `Ingredients: ${recipe.ingredients.join(', ')}`;
+                recipeCard.appendChild(ingredients);
+
+                const preparation = document.createElement('p');
+                preparation.textContent = `Preparation: ${recipe.preparation.join(', ')}`;
+                recipeCard.appendChild(preparation);
+
+                const calories = document.createElement('p');
+                calories.textContent = `Calories: ${recipe.calories}`;
+                recipeCard.appendChild(calories);
+
+                const protein = document.createElement('p');
+                protein.textContent = `Protein: ${recipe.protein}`;
+                recipeCard.appendChild(protein);
+
+                const fat = document.createElement('p');
+                fat.textContent = `Fat: ${recipe.fat}`;
+                recipeCard.appendChild(fat);
+
+                const carbs = document.createElement('p');
+                carbs.textContent = `Carbs: ${recipe.carbs}`;
+                recipeCard.appendChild(carbs);
+
+                // ADD TO DAY DROPDOWN
+                const dropdown = document.createElement('div');
+                    dropdown.classList.add('dropdown');
+                    recipeCard.appendChild(dropdown);
+
+                    const dropdownButton = document.createElement('button');
+                    dropdownButton.textContent = 'Add to Day';
+                    dropdownButton.classList.add('dropbtn');
+                    dropdown.appendChild(dropdownButton);
+
+                    const dropdownContent = document.createElement('div');
+                    dropdownContent.classList.add('dropdown-content');
+                    dropdown.appendChild(dropdownContent);
+
+                    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                    daysOfWeek.forEach(day => {
+                        const dayLink = document.createElement('a');
+                        dayLink.textContent = day;
+                        dayLink.href = `mealplan.html?recipe=${recipe.name}&day=${day}`;
+                        dropdownContent.appendChild(dayLink);
+                    });
+
+                    recipeContainer.appendChild(recipeCard);
+
+                recipeContainer.appendChild(recipeCard);
+            });
+        }
+        }
+
+        // SEARCH RECIPES
+        async function searchRecipes(query) {
+        try {
+            const response = await fetch(`http://localhost:3001/recipes/findRecipe/${encodeURIComponent(query)}`);
+            const recipe = await response.json();
+            console.log(recipe);
+            renderRecipes(recipe ? [recipe] : []);
+        } catch (error) {
+            console.log(error);
+        }
+        }
+
+        // TOKENS
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            idUser = urlParams.get('idUser');
+            const accessToken = window.localStorage.getItem('accessToken');
+            const refreshToken = window.localStorage.getItem('refreshToken');
+            const idUser1 = window.localStorage.getItem('idUser');
+
+            const homeLink = document.getElementById('homeLink');
+            homeLink.href = `homepage.html?idUser=${idUser1}`;
+
+            const mealPlannerLink = document.getElementById('mealPlannerLink');
+            mealPlannerLink.href = `mealplan.html?idUser=${idUser1}`;
+
+            console.log(accessToken, refreshToken);
+
+            if (!accessToken || !refreshToken) {
+                window.location.href = 'login.html';
+            }
+            else {
+                fetchRecipes();
+            }
+        });
+
+        // Add an event listener to the search button
+        document.getElementById('searchButton').addEventListener('click', async () => {
+        const query = document.getElementById('searchInput').value.trim(); 
+
+        if (query !== '') {
+            await searchRecipes(query);
+        } else {
+            await fetchRecipes();
+        }
+        });
+
+        // LOGOUT
+        const logoutButton = document.getElementById('logoutButton');
+
+        logoutButton.addEventListener('click', async () => {
+            const response = await fetch('http://localhost:3001/users/logout', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                alert('Logout successful');
+                // Redirect to the login page or any other desired page
+                window.location.href = 'login.html';
+            } else {
+                const data = await response.json();
+                alert(data.error);
+            }
+        });
+
+        // SEARCH
+
+        // const searchInput = document.getElementById('searchInput');
+        // const searchButton = document.getElementById('searchButton');
+        // const recipeTableBody = document.getElementById('recipeTableBody');
+
+        // searchButton.addEventListener('click', () => {
+        //   const recipeName = searchInput.value.trim(); // Get the search query from the input field
+
+        //   if (recipeName.length > 0) {
+        //     // Send a GET request to the server to search for recipes with the given name
+        //     fetch(`http://localhost:3001/recipeName/${recipeName}`, {
+        //       method: 'GET',
+        //       mode: 'cors',
+        //       headers: {
+        //         'Content-Type': 'application/json'
+        //       }
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //       // Clear the existing table rows
+        //       recipeTableBody.innerHTML = '';
+
+        //       if (data && data.length > 0) {
+        //         // If filtered recipes are found, add them to the table
+        //         data.forEach(recipe => {
+        //           const row = recipeTableBody.insertRow();
+        //           row.insertCell().textContent = recipe.id;
+        //           row.insertCell().textContent = recipe.name;
+        //           row.insertCell().textContent = recipe.ingredients.join(', ');
+        //           row.insertCell().textContent = recipe.preparation;
+        //           row.insertCell().textContent = recipe.calories;
+        //           row.insertCell().textContent = recipe.protein;
+        //           row.insertCell().textContent = recipe.fat;
+        //           row.insertCell().textContent = recipe.carbs;
+        //         });
+        //       } else {
+        //         // If no matching recipe is found, display an alert message
+        //         alert('No matching recipes found');
+        //       }
+        //     })
+        //     .catch(error => {
+        //       console.error(`Error searching for recipe with name ${recipeName}:`, error);
+        //     });
+        //   } else {
+        //     alert('Please enter a recipe name to search for');
+        //   }
+        // });
+    </script>
+</body>
+
+</html>
