@@ -17,8 +17,8 @@ const loginSchema = Joi.object({
 
 const recipeSchema = Joi.object({
     name: Joi.string().min(2).required(),
-    ingredients: Joi.string().min(2).required(),
-    preparation: Joi.string().min(2).required(),
+    ingredients: Joi.array().min(2).required(),
+    preparation: Joi.array().min(2).required(),
     calories: Joi.number().required(),
     protein: Joi.number().required(),
     fat: Joi.number().required(),

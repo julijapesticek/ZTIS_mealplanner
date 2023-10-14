@@ -11,11 +11,11 @@ const recipeSchema = new mongoose.Schema({
     required: true,
   },
   ingredients: [{
-    type: String,
+    type: Array,
     required: true,
   }],
   preparation: [{
-    type: String,
+    type: Array,
     required: true,
   }],
   calories: {

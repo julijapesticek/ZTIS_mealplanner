@@ -183,35 +183,12 @@ router.route('/updateRecipe/:id').put(async (req, res) => {
       } catch (err) {
         res.status(500).send(err);
       }
-
-    // if (req.params.id !== req.body._id) {
-    //     res.status(400).json('IDja nista enaka!')
-    // } else {
-        
-    //     try {
-    //         const najdirecipe = await Recipe.findOne({
-    //             _id:
-    //                 req.params.id
-    //         });
-    //         if (najdirecipe) {
-    //             await Recipe.findByIdAndUpdate(req.params.id,
-    //                 req.body);
-    //             res.status(201).json({ msg: 'Recipe je bil posodobljen' });
-    //         } else {
-    //             res.status(404).json({
-    //                 msg: `Recipe z id=${req.params.id} ni bil najden`
-    //             });
-    //         }
-    //     } catch (err) {
-    //         res.status(500).send(err)
-    //     }
-    // }
 });
 
 
 
 // DELETE RECIPE
-router.route('/deleteRecipe/:id').delete(verifyAccessToken, async (req, res) => {
+router.route('/deleteRecipe/:id').delete( async (req, res) => {
     try {
         const brisi = await
             Recipe.findByIdAndDelete(req.params.id);
